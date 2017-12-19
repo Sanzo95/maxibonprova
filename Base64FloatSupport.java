@@ -183,7 +183,8 @@ public class Base64FloatSupport {
 		Character c = '"';
 		byte ch = c.toString().getBytes()[0];
 		Integer intero = null;
-		int digit = DIGITS[(int) (bits & 0xff)];
+		Long longdigit = (bits & 0xff);
+		int digit = DIGITS[longdigit.intValue()];
 		intero = digit >> 8;
 		byte b2 = intero.toString().getBytes()[0];
 		byte b1 = (byte) digit;
@@ -191,7 +192,7 @@ public class Base64FloatSupport {
 		if (bits == 0) {
 			stream.write(ch, b2, b1, ch);
 		}
-		digit = DIGITS[(int) (bits & 0xff)];
+		digit = DIGITS[longdigit.intValue()];
 		intero = digit >> 8;
 		byte b4 = intero.toString().getBytes()[0];
 		byte b3 = (byte) digit;
@@ -199,7 +200,7 @@ public class Base64FloatSupport {
 		if (bits == 0) {
 			stream.write(ch, b4, b3, b2, b1, ch);
 		}
-		digit = DIGITS[(int) (bits & 0xff)];
+		digit = DIGITS[longdigit.intValue()];
 		intero = digit >> 8;
 		byte b6 = intero.toString().getBytes()[0];
 		byte b5 = (byte) digit;
@@ -208,7 +209,7 @@ public class Base64FloatSupport {
 			stream.write(ch, b6, b5, b4, b3);
 			stream.write(b2, b1, ch);
 		}
-		digit = DIGITS[(int) (bits & 0xff)];
+		digit = DIGITS[longdigit.intValue()];
 		intero = digit >> 8;
 		byte b8 = intero.toString().getBytes()[0];
 		byte b7 = (byte) digit;
@@ -217,7 +218,7 @@ public class Base64FloatSupport {
 			stream.write(ch, b8, b7, b6, b5, b4);
 			stream.write(b3, b2, b1, ch);
 		}
-		digit = DIGITS[(int) (bits & 0xff)];
+		digit = DIGITS[longdigit.intValue()];
 		intero = digit >> 8;
 		byte b10 = intero.toString().getBytes()[0];
 		byte b9 = (byte) digit;
@@ -226,7 +227,7 @@ public class Base64FloatSupport {
 			stream.write(ch, b10, b9, b8, b7, b6);
 			stream.write(b5, b4, b3, b2, b1, ch);
 		}
-		digit = DIGITS[(int) (bits & 0xff)];
+		digit = DIGITS[longdigit.intValue()];
 		intero = digit >> 8;
 		byte b12 = intero.toString().getBytes()[0];
 		byte b11 = (byte) digit;
@@ -236,7 +237,7 @@ public class Base64FloatSupport {
 			stream.write(b7, b6, b5, b4, b3, b2);
 			stream.write(b1, ch);
 		}
-		digit = DIGITS[(int) (bits & 0xff)];
+		digit = DIGITS[longdigit.intValue()];
 		intero = digit >> 8;
 		byte b14 = intero.toString().getBytes()[0];
 		byte b13 = (byte) digit;
@@ -246,7 +247,7 @@ public class Base64FloatSupport {
 			stream.write(b9, b8, b7, b6, b5, b4);
 			stream.write(b3, b2, b1, ch);
 		}
-		digit = DIGITS[(int) (bits & 0xff)];
+		digit = DIGITS[longdigit.intValue()];
 		intero = digit >> 8;
 		byte b16 = intero.toString().getBytes()[0];
 		byte b15 = (byte) digit;
