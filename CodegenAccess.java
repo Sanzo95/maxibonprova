@@ -108,6 +108,7 @@ public class CodegenAccess {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static final <T> T read(String cacheKey, JsonIterator iter) throws IOException {
 		return ((T) Codegen.getDecoder(cacheKey, null).decode(iter));
 	}
