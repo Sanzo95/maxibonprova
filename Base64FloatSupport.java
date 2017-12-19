@@ -55,14 +55,20 @@ public class Base64FloatSupport {
 		JsoniterSpi.registerTypeEncoder(Double.class, new Encoder.ReflectionEncoder() {
 			@Override
 			public void encode(Object obj, JsonStream stream) throws IOException {
-				Double number = (Double) obj;
+				Double number = null;
+				if (obj instanceof Double) {
+					number = (Double) obj;
+				}
 				long bits = Double.doubleToRawLongBits(number.doubleValue());
 				Base64.encodeLongBits(bits, stream);
 			}
 
 			@Override
 			public Any wrap(Object obj) {
-				Double number = (Double) obj;
+				Double number = null;
+				if (obj instanceof Double) {
+					number = (Double) obj;
+				}
 				return Any.wrap(number.doubleValue());
 			}
 		});
@@ -76,15 +82,26 @@ public class Base64FloatSupport {
 		JsoniterSpi.registerTypeEncoder(Float.class, new Encoder.ReflectionEncoder() {
 			@Override
 			public void encode(Object obj, JsonStream stream) throws IOException {
-				Float number = (Float) obj;
+				Float number = null;
+				if (obj instanceof Float) {
+					number = (Float) obj;
+				}
 				long bits = Double.doubleToRawLongBits(number.doubleValue());
 				Base64.encodeLongBits(bits, stream);
 			}
 
 			@Override
 			public Any wrap(Object obj) {
-				Float number = (Float) obj;
-				return Any.wrap(number.floatValue());
+				try {
+					if (obj instanceof Float) {
+						return Any.wrap(((Float) obj).floatValue());
+					}
+				} catch (Exception e) {
+					System.out.print(e.getMessage());
+				} finally {
+					System.out.print("");
+				}
+				return null;
 			}
 		});
 		JsoniterSpi.registerTypeEncoder(float.class, new Encoder.FloatEncoder() {
@@ -127,9 +144,11 @@ public class Base64FloatSupport {
 				byte token = CodegenAccess.nextToken(iter);
 				CodegenAccess.unreadByte(iter);
 				if (token == '"') {
-					return (float) Double.longBitsToDouble(Base64.decodeLongBits(iter));
+					Double d = Double.longBitsToDouble(Base64.decodeLongBits(iter));
+					return d.floatValue();
 				} else {
-					return (float) iter.readDouble();
+					Double d = iter.readDouble();
+					return d.floatValue();
 				}
 			}
 		});
@@ -139,9 +158,11 @@ public class Base64FloatSupport {
 				byte token = CodegenAccess.nextToken(iter);
 				CodegenAccess.unreadByte(iter);
 				if (token == '"') {
-					return (float) Double.longBitsToDouble(Base64.decodeLongBits(iter));
+					Double d = Double.longBitsToDouble(Base64.decodeLongBits(iter));
+					return d.floatValue();
 				} else {
-					return (float) iter.readDouble();
+					Double d = iter.readDouble();
+					return d.floatValue();
 				}
 			}
 		});
@@ -171,7 +192,8 @@ public class Base64FloatSupport {
 			stream.write(ch, b2, b1, ch);
 		}
 		digit = DIGITS[(int) (bits & 0xff)];
-		byte b4 = (byte) (digit >> 8);
+		intero = digit >> 8;
+		byte b4 = intero.toString().getBytes()[0];
 		byte b3 = (byte) digit;
 		bits = bits >> 8;
 		if (bits == 0) {
