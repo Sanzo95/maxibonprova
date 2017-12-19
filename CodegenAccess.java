@@ -107,15 +107,18 @@ public class CodegenAccess {
 		}
 	}
 
-	public static final <T> T read(String cacheKey, JsonIterator iter) throws IOException{
+	public static final <T> T read(String cacheKey, JsonIterator iter) throws IOException {
+		T o = null;
 		try {
-			return ((T) Codegen.getDecoder(cacheKey, null).decode(iter));
-		}catch (RuntimeException r) {
-			System.out.println("");
-		}catch (Exception e) {
-			System.out.println("");
-		}finally {
-			return null;
+			o = (T) Codegen.getDecoder(cacheKey, null).decode(iter);
+		} catch (ClassCastException c) {
+			System.out.print(c.getMessage());
+		} catch (RuntimeException r) {
+			System.out.print(r.getMessage());
+		} catch (Exception e) {
+			System.out.print(e.getMessage());
+		} finally {
+			return o;
 		}
 	}
 
