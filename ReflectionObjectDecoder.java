@@ -4,6 +4,7 @@ import com.jsoniter.any.Any;
 import com.jsoniter.spi.*;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -34,7 +35,7 @@ class ReflectionObjectDecoder {
 		}
 	}
 
-	private final void init(ClassInfo classInfo) throws Exception {
+	private final void init(ClassInfo classInfo) {
 		Class clazz = classInfo.clazz;
 		ClassDescriptor desc = ClassDescriptor.getDecodingClassDescriptor(classInfo, true);
 		for (Binding param : desc.ctor.parameters) {
@@ -124,7 +125,8 @@ class ReflectionObjectDecoder {
 			}
 		}
 
-		private Object decode_(JsonIterator iter) throws Exception {
+		private Object decode_(JsonIterator iter) throws IllegalAccessException, IllegalArgumentException,
+				InvocationTargetException, IOException, InstantiationException {
 			if (iter.readNull()) {
 				CodegenAccess.resetExistingObject(iter);
 				return null;
@@ -190,7 +192,8 @@ class ReflectionObjectDecoder {
 			}
 		}
 
-		private Object decode_(JsonIterator iter) throws Exception {
+		private Object decode_(JsonIterator iter) throws IllegalAccessException, IllegalArgumentException,
+				InvocationTargetException, IOException, InstantiationException {
 			if (iter.readNull()) {
 				CodegenAccess.resetExistingObject(iter);
 				return null;
@@ -198,34 +201,23 @@ class ReflectionObjectDecoder {
 			if (iter.tempObjects == null) {
 				iter.tempObjects = new HashMap<String, Object>();
 			}
-			if (iter.tempObjects.get(tempCacheKey) instanceof Object[]){
-			Object[] temp = (Object[]) iter.tempObjects.get(tempCacheKey);
-			if (temp == null) {
-				temp = new Object[tempCount];
-				iter.tempObjects.put(tempCacheKey, temp);
-			}
-			Arrays.fill(temp, NOT_SET);
-			if (!CodegenAccess.readObjectStart(iter)) {
-				if (requiredIdx > 0) {
-					throw new JsonException("missing required properties: " + collectMissingFields(0));
+			if (iter.tempObjects.get(tempCacheKey) instanceof Object[]) {
+				Object[] temp = (Object[]) iter.tempObjects.get(tempCacheKey);
+				if (temp == null) {
+					temp = new Object[tempCount];
+					iter.tempObjects.put(tempCacheKey, temp);
 				}
-				return createNewObject(iter, temp);
-			}
-			Map<String, Object> extra = null;
-			long tracker = 0L;
-			Slice fieldName = CodegenAccess.readObjectFieldAsSlice(iter);
-			Binding binding = allBindings.get(fieldName);
-			if (binding == null) {
-				extra = onUnknownProperty(iter, fieldName, extra);
-			} else {
-				if (binding.asMissingWhenNotPresent) {
-					tracker |= binding.mask;
+				Arrays.fill(temp, NOT_SET);
+				if (!CodegenAccess.readObjectStart(iter)) {
+					if (requiredIdx > 0) {
+						throw new JsonException("missing required properties: " + collectMissingFields(0));
+					}
+					return createNewObject(iter, temp);
 				}
-				temp[binding.idx] = decodeBinding(iter, binding);
-			}
-			while (CodegenAccess.nextToken(iter) == ',') {
-				fieldName = CodegenAccess.readObjectFieldAsSlice(iter);
-				binding = allBindings.get(fieldName);
+				Map<String, Object> extra = null;
+				long tracker = 0L;
+				Slice fieldName = CodegenAccess.readObjectFieldAsSlice(iter);
+				Binding binding = allBindings.get(fieldName);
 				if (binding == null) {
 					extra = onUnknownProperty(iter, fieldName, extra);
 				} else {
@@ -234,29 +226,39 @@ class ReflectionObjectDecoder {
 					}
 					temp[binding.idx] = decodeBinding(iter, binding);
 				}
-			}
-			if (tracker != expectedTracker) {
-				throw new JsonException("missing required properties: " + collectMissingFields(tracker));
-			}
-			Object obj = createNewObject(iter, temp);
-			setExtra(obj, extra);
-			for (Binding field : desc.fields) {
-				Object val = temp[field.idx];
-				if (val != NOT_SET && field.fromNames.length > 0) {
-					field.field.set(obj, val);
+				while (CodegenAccess.nextToken(iter) == ',') {
+					fieldName = CodegenAccess.readObjectFieldAsSlice(iter);
+					binding = allBindings.get(fieldName);
+					if (binding == null) {
+						extra = onUnknownProperty(iter, fieldName, extra);
+					} else {
+						if (binding.asMissingWhenNotPresent) {
+							tracker |= binding.mask;
+						}
+						temp[binding.idx] = decodeBinding(iter, binding);
+					}
 				}
-			}
-			for (Binding setter : desc.setters) {
-				Object val = temp[setter.idx];
-				if (val != NOT_SET) {
-					setter.method.invoke(obj, val);
+				if (tracker != expectedTracker) {
+					throw new JsonException("missing required properties: " + collectMissingFields(tracker));
 				}
+				Object obj = createNewObject(iter, temp);
+				setExtra(obj, extra);
+				for (Binding field : desc.fields) {
+					Object val = temp[field.idx];
+					if (val != NOT_SET && field.fromNames.length > 0) {
+						field.field.set(obj, val);
+					}
+				}
+				for (Binding setter : desc.setters) {
+					Object val = temp[setter.idx];
+					if (val != NOT_SET) {
+						setter.method.invoke(obj, val);
+					}
+				}
+				applyWrappers(temp, obj);
+				return obj;
 			}
-			applyWrappers(temp, obj);
-			return obj;
-			} else {
-				throw new Exception();
-			}
+			return null;
 		}
 	}
 
@@ -273,7 +275,8 @@ class ReflectionObjectDecoder {
 			}
 		}
 
-		private Object decode_(JsonIterator iter) throws Exception {
+		private Object decode_(JsonIterator iter) throws IllegalAccessException, IllegalArgumentException,
+				InvocationTargetException, InstantiationException, IOException {
 			if (iter.readNull()) {
 				CodegenAccess.resetExistingObject(iter);
 				return null;
@@ -294,30 +297,15 @@ class ReflectionObjectDecoder {
 			if (iter.tempObjects == null) {
 				iter.tempObjects = new HashMap<String, Object>();
 			}
-			if (iter.tempObjects.get(tempCacheKey) instanceof Object[]){
-			Object[] temp = (Object[]) iter.tempObjects.get(tempCacheKey);
-			if (temp == null) {
-				temp = new Object[tempCount];
-				iter.tempObjects.put(tempCacheKey, temp);
-			}
-			Arrays.fill(temp, NOT_SET);
-			Slice fieldName = CodegenAccess.readObjectFieldAsSlice(iter);
-			Binding binding = allBindings.get(fieldName);
-			if (binding == null) {
-				extra = onUnknownProperty(iter, fieldName, extra);
-			} else {
-				if (binding.asMissingWhenNotPresent) {
-					tracker |= binding.mask;
+			if (iter.tempObjects.get(tempCacheKey) instanceof Object[]) {
+				Object[] temp = (Object[]) iter.tempObjects.get(tempCacheKey);
+				if (temp == null) {
+					temp = new Object[tempCount];
+					iter.tempObjects.put(tempCacheKey, temp);
 				}
-				if (canNotSetDirectly(binding)) {
-					temp[binding.idx] = decodeBinding(iter, obj, binding);
-				} else {
-					setToBinding(obj, binding, decodeBinding(iter, obj, binding));
-				}
-			}
-			while (CodegenAccess.nextToken(iter) == ',') {
-				fieldName = CodegenAccess.readObjectFieldAsSlice(iter);
-				binding = allBindings.get(fieldName);
+				Arrays.fill(temp, NOT_SET);
+				Slice fieldName = CodegenAccess.readObjectFieldAsSlice(iter);
+				Binding binding = allBindings.get(fieldName);
 				if (binding == null) {
 					extra = onUnknownProperty(iter, fieldName, extra);
 				} else {
@@ -330,24 +318,40 @@ class ReflectionObjectDecoder {
 						setToBinding(obj, binding, decodeBinding(iter, obj, binding));
 					}
 				}
-			}
-			if (tracker != expectedTracker) {
-				if (desc.onMissingProperties == null) {
-					throw new JsonException("missing required properties: " + collectMissingFields(tracker));
-				} else {
-					setToBinding(obj, desc.onMissingProperties, collectMissingFields(tracker));
+				while (CodegenAccess.nextToken(iter) == ',') {
+					fieldName = CodegenAccess.readObjectFieldAsSlice(iter);
+					binding = allBindings.get(fieldName);
+					if (binding == null) {
+						extra = onUnknownProperty(iter, fieldName, extra);
+					} else {
+						if (binding.asMissingWhenNotPresent) {
+							tracker |= binding.mask;
+						}
+						if (canNotSetDirectly(binding)) {
+							temp[binding.idx] = decodeBinding(iter, obj, binding);
+						} else {
+							setToBinding(obj, binding, decodeBinding(iter, obj, binding));
+						}
+					}
 				}
-			}
-			setExtra(obj, extra);
-			applyWrappers(temp, obj);
-			return obj;
+				if (tracker != expectedTracker) {
+					if (desc.onMissingProperties == null) {
+						throw new JsonException("missing required properties: " + collectMissingFields(tracker));
+					} else {
+						setToBinding(obj, desc.onMissingProperties, collectMissingFields(tracker));
+					}
+				}
+				setExtra(obj, extra);
+				applyWrappers(temp, obj);
+				return obj;
 			} else {
-				throw new Exception();
+				return null;
 			}
 		}
 	}
 
-	private void setToBinding(Object obj, Binding binding, Object value) throws Exception {
+	private void setToBinding(Object obj, Binding binding, Object value)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		if (binding.field != null) {
 			binding.field.set(obj, value);
 		} else {
@@ -355,7 +359,8 @@ class ReflectionObjectDecoder {
 		}
 	}
 
-	private void setExtra(Object obj, Map<String, Object> extra) throws Exception {
+	private void setExtra(Object obj, Map<String, Object> extra)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		if (desc.asExtraForUnknownProperties) {
 			if (desc.onExtraProperties == null) {
 				for (String fieldName : extra.keySet()) {
@@ -370,8 +375,6 @@ class ReflectionObjectDecoder {
 				if (entry.getValue() instanceof Any) {
 					Any value = (Any) entry.getValue();
 					wrapper.invoke(obj, entry.getKey(), value.object());
-				} else {
-					throw new Exception();
 				}
 			}
 		}
@@ -381,12 +384,13 @@ class ReflectionObjectDecoder {
 		return binding.field == null && binding.method == null;
 	}
 
-	private Object decodeBinding(JsonIterator iter, Binding binding) throws Exception {
+	private Object decodeBinding(JsonIterator iter, Binding binding) throws IOException {
 		Object value = binding.decoder.decode(iter);
 		return value;
 	}
 
-	private Object decodeBinding(JsonIterator iter, Object obj, Binding binding) throws Exception {
+	private Object decodeBinding(JsonIterator iter, Object obj, Binding binding)
+			throws IllegalArgumentException, IllegalAccessException, IOException {
 		if (binding.valueCanReuse) {
 			CodegenAccess.setExistingObject(iter, binding.field.get(obj));
 		}
@@ -419,7 +423,8 @@ class ReflectionObjectDecoder {
 		return missingFields;
 	}
 
-	private void applyWrappers(Object[] temp, Object obj) throws Exception {
+	private void applyWrappers(Object[] temp, Object obj)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		for (WrapperDescriptor wrapper : desc.bindingTypeWrappers) {
 			Object[] args = new Object[wrapper.parameters.size()];
 			for (int i = 0; i < wrapper.parameters.size(); i++) {
@@ -432,7 +437,8 @@ class ReflectionObjectDecoder {
 		}
 	}
 
-	private Object createNewObject(JsonIterator iter, Object[] temp) throws Exception {
+	private Object createNewObject(JsonIterator iter, Object[] temp)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
 		if (iter.tempObjects == null) {
 			iter.tempObjects = new HashMap<String, Object>();
 		}
@@ -451,12 +457,13 @@ class ReflectionObjectDecoder {
 				}
 			}
 			return createNewObject(ctorArgs);
-		} else {
-			throw new Exception();
-		}
+		} else
+			return null;
+
 	}
 
-	private Object createNewObject(Object... args) throws Exception {
+	private Object createNewObject(Object... args)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
 		if (desc.ctor.objectFactory != null) {
 			return desc.ctor.objectFactory.create(desc.clazz);
 		}
