@@ -90,10 +90,9 @@ class Codegen {
 			}
 			if (isDoingStaticCodegen.outputDir == "") {
 				try {
-					if(Class.forName(cacheKey).newInstance() instanceof Encoder) {
-						
+					if (Class.forName(cacheKey).newInstance() instanceof Encoder) {
+						encoder = (Encoder) Class.forName(cacheKey).newInstance();
 					}
-					encoder = (Encoder) Class.forName(cacheKey).newInstance();
 					return encoder;
 				} catch (Exception e) {
 					if (mode == EncodingMode.STATIC_MODE) {
@@ -151,19 +150,19 @@ class Codegen {
 
 	private static Type chooseAccessibleSuper(Type type) {
 		Type[] typeArgs = new Type[0];
-		Class clazz;
+		Class clazz = null;
 		if (type instanceof ParameterizedType) {
+			ParameterizedType pType = null;
 			if (type instanceof ParameterizedType) {
-				
+				pType = (ParameterizedType) type;
 			}
-			ParameterizedType pType = (ParameterizedType) type;
 			clazz = (Class) pType.getRawType();
 			typeArgs = pType.getActualTypeArguments();
 		} else {
-			if(type instanceof Class) {
-				
+			if (type instanceof Class) {
+				clazz = (Class) type;
 			}
-			clazz = (Class) type;
+
 		}
 		if (Modifier.isPublic(clazz.getModifiers())) {
 			return type;

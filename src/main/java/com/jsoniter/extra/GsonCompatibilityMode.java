@@ -60,12 +60,13 @@ public class GsonCompatibilityMode extends Config {
 	}
 
 	protected Builder builder() {
-		if(builder() instanceof Builder) {
-
+		Builder b = null;
+		if (super.builder() instanceof Builder) {
+			b = (Builder) super.builder();
 		}
-		return (Builder) super.builder();
+		return b;
 	}
-
+ 
 	public static class Builder extends Config.Builder {
 		private boolean excludeFieldsWithoutExposeAnnotation = false;
 		private boolean disableHtmlEscaping = false;
@@ -163,10 +164,11 @@ public class GsonCompatibilityMode extends Config {
 
 		public GsonCompatibilityMode build() {
 			escapeUnicode(false);
-			if(build() == super.build()) {
-
+			GsonCompatibilityMode g = null;
+			if (super.build() instanceof GsonCompatibilityMode) {
+				g = (GsonCompatibilityMode) super.build();
 			}
-			return (GsonCompatibilityMode) super.build();
+			return g;
 		}
 
 		@Override
@@ -182,11 +184,10 @@ public class GsonCompatibilityMode extends Config {
 				return false;
 			if (!super.equals(o))
 				return false;
-			if(o instanceof Builder ) {
-
+			Builder builder = null;
+			if (o instanceof Builder) {
+				builder = (Builder) o;
 			}
-
-			Builder builder = (Builder) o;
 
 			if (excludeFieldsWithoutExposeAnnotation != builder.excludeFieldsWithoutExposeAnnotation)
 				return false;
@@ -201,11 +202,11 @@ public class GsonCompatibilityMode extends Config {
 				return false;
 			if (serializationExclusionStrategies != null
 					? !serializationExclusionStrategies.equals(builder.serializationExclusionStrategies)
-							: builder.serializationExclusionStrategies != null)
+					: builder.serializationExclusionStrategies != null)
 				return false;
 			return deserializationExclusionStrategies != null
 					? deserializationExclusionStrategies.equals(builder.deserializationExclusionStrategies)
-							: builder.deserializationExclusionStrategies == null;
+					: builder.deserializationExclusionStrategies == null;
 		}
 
 		@Override
@@ -225,10 +226,10 @@ public class GsonCompatibilityMode extends Config {
 
 		@Override
 		public Config.Builder copy() {
-			if(copy() == super.copy()) {
-
+			Builder copied = null;
+			if (super.copy() instanceof Builder) {
+				copied = (Builder) super.copy();
 			}
-			Builder copied = (Builder) super.copy();
 			copied.excludeFieldsWithoutExposeAnnotation = excludeFieldsWithoutExposeAnnotation;
 			copied.disableHtmlEscaping = disableHtmlEscaping;
 			copied.dateFormat = dateFormat;
@@ -272,13 +273,13 @@ public class GsonCompatibilityMode extends Config {
 			return new Encoder() {
 				@Override
 				public void encode(Object obj, JsonStream stream) throws IOException {
-					if(obj instanceof String) {
-
+					String value = null;
+					if (obj instanceof String) {
+						value = (String) obj;
 					}
-					String value = (String) obj;
 					stream.write('"');
 					int _surrogate;
-					int i = 0; 
+					int i = 0;
 					while (i < value.length()) {
 						int c = value.charAt(i);
 						String replacement;
@@ -304,7 +305,7 @@ public class GsonCompatibilityMode extends Config {
 									Integer n1 = new Integer((0xe0 | (c >> 12)));
 									Integer n2 = new Integer((0x80 | ((c >> 6) & 0x3f)));
 									Integer n3 = new Integer((0x80 | (c & 0x3f)));
-									stream.write(n1.byteValue() , n2.byteValue(), n3.byteValue());
+									stream.write(n1.byteValue(), n2.byteValue(), n3.byteValue());
 									continue;
 								}
 								// Yup, a surrogate:
@@ -319,7 +320,7 @@ public class GsonCompatibilityMode extends Config {
 									// end?
 									break;
 								}
-								i++; 
+								i++;
 								c = value.charAt(i);
 								int firstPart = _surrogate;
 								_surrogate = 0;
@@ -327,18 +328,18 @@ public class GsonCompatibilityMode extends Config {
 								if (c < SURR2_FIRST || c > SURR2_LAST) {
 									throw new JsonException(
 											"Broken surrogate pair: first char 0x" + Integer.toHexString(firstPart)
-											+ ", second 0x" + Integer.toHexString(c) + "; illegal combination");
+													+ ", second 0x" + Integer.toHexString(c) + "; illegal combination");
 								}
 								c = 0x10000 + ((firstPart - SURR1_FIRST) << 10) + (c - SURR2_FIRST);
 								if (c > 0x10FFFF) { // illegal in JSON as well
 									// as in XML
 									throw new JsonException("illegalSurrogate");
 								}
-								
+
 								Integer n1 = new Integer((0xf0 | (c >> 18)));
 								Integer n2 = new Integer((0x80 | ((c >> 12) & 0x3f)));
 								Integer n3 = new Integer((0x80 | ((c >> 6) & 0x3f)));
-								Integer n4 = new Integer((0x80 | (c & 0x3f)));								
+								Integer n4 = new Integer((0x80 | (c & 0x3f)));
 								stream.write(n1.byteValue(), n2.byteValue(), n3.byteValue(), n4.byteValue());
 							}
 						}

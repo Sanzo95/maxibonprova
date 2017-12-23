@@ -107,11 +107,14 @@ public class CodegenAccess {
 			throw new IOException();
 		}
 	}
-/*
+
 	public static final <T> T read(String cacheKey, JsonIterator iter) throws IOException {
-		return ((T) Codegen.getDecoder(cacheKey, null).decode(iter));
+		T decode = null;
+		if (Codegen.getDecoder(cacheKey, null).decode(iter) instanceof Class<?>)
+			decode = (T) Codegen.getDecoder(cacheKey, null).decode(iter);
+		return decode;
 	}
-*/
+ 
 	public static boolean readArrayStart(JsonIterator iter) throws IOException {
 		byte c = IterImpl.nextToken(iter);
 		if (c == '[') {

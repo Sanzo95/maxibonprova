@@ -329,21 +329,22 @@ public class JsonIterator implements Closeable {
 	 *            object type
 	 * @return data binding result, might not be the same object
 	 * @throws IOException
-	 *             if I/O went wrong
+	 *             if I/O went wrong 
 	 */
 	public final <T> T read(T existingObject) throws IOException {
+		Object o = null;
+		T typeT = null;
 		try {
 			this.existingObject = existingObject;
 			Class<?> clazz = existingObject.getClass();
-			if(currentConfig().getDecoderCacheKey(clazz) instanceof String ) {
-				String cacheKey = currentConfig().getDecoderCacheKey(clazz);
-				return (T) Codegen.getDecoder(cacheKey, clazz).decode(this);
-			}
-			
+			String cacheKey = currentConfig().getDecoderCacheKey(clazz);
+			o = Codegen.getDecoder(cacheKey, clazz).decode(this);
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw reportError("read", "premature end");
+		}finally {
+			typeT = (T) o;
 		}
-		return existingObject;
+		return typeT;
 	}
 
 	private Config currentConfig() {
@@ -367,32 +368,39 @@ public class JsonIterator implements Closeable {
 	 *             if I/O went wrong
 	 */
 	public final <T> T read(TypeLiteral<T> typeLiteral, T existingObject) throws IOException {
+		T typeT = null;
+		Object o = null;
 		try {
 			this.existingObject = existingObject;
-			if(currentConfig().getDecoderCacheKey(null)instanceof  String ) {
-				String cacheKey = currentConfig().getDecoderCacheKey(typeLiteral.getType());
-				return (T) Codegen.getDecoder(cacheKey, typeLiteral.getType()).decode(this);
-			}
-		
+			String cacheKey = currentConfig().getDecoderCacheKey(typeLiteral.getType());
+			o = Codegen.getDecoder(cacheKey, typeLiteral.getType()).decode(this);
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw reportError("read", "premature end");
+		}finally {
+			if (o instanceof Class<?>)
+				typeT = (T) o;
 		}
-		return existingObject;
+		return typeT;
 	}
 
 	public final <T> T read(Class<T> clazz) throws IOException {
-		if(T == ((Type) clazz) ) {
-			return (T) read((Type) clazz);
+		Object o = read((Type) clazz);
+		T typeT = null;
+		if(o instanceof Class<?>) {
+			typeT =  (T) o;
 		}
-		return null;
+		return typeT;
 		
 	}
 
 	public final <T> T read(TypeLiteral<T> typeLiteral) throws IOException {
-		if(T == (typeLiteral.getType())) {
-			return (T) read(typeLiteral.getType());
+		Object o = null;
+		T typeT = null;
+		o = read(typeLiteral.getType());
+		if(o instanceof Class<?>) {
+			typeT =  (T) o;
 		}
-		return null;
+		return typeT;
 		
 	}
 
