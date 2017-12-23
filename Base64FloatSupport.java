@@ -172,7 +172,8 @@ public class Base64FloatSupport {
 		Slice slice = iter.readStringAsSlice();
 		byte[] data = slice.data();
 		long val = 0;
-		for (int i = slice.head(); i < slice.tail(); i++) {
+		int tail = slice.tail();
+		for (int i = slice.head(); i < tail; i++) {
 			byte b = data[i];
 			val = val << 4 | DEC[b];
 		}

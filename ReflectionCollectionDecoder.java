@@ -44,8 +44,10 @@ class ReflectionCollectionDecoder implements Decoder {
 			} else {
 				col.clear();
 			}
-			while (iter.readArray()) {
+			boolean flag = iter.readArray();
+			while (flag) {
 				col.add(compTypeDecoder.decode(iter));
+				flag = iter.readArray();
 			}
 			return col;
 		} else {

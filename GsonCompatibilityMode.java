@@ -66,7 +66,7 @@ public class GsonCompatibilityMode extends Config {
 		}
 		return b;
 	}
- 
+
 	public static class Builder extends Config.Builder {
 		private boolean excludeFieldsWithoutExposeAnnotation = false;
 		private boolean disableHtmlEscaping = false;
@@ -280,7 +280,8 @@ public class GsonCompatibilityMode extends Config {
 					stream.write('"');
 					int _surrogate = 0;
 					int i = 0;
-					while (i < value.length()) {
+					int size = value.length();
+					while (i < size) {
 						int c = value.charAt(i);
 						String replacement = null;
 						if (c < 128) {

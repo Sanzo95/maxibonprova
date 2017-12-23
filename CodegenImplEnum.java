@@ -87,11 +87,13 @@ class CodegenImplEnum {
 
 	private static void addFieldDispatch(StringBuilder lines, int len, int i, Map<Byte, Object> current,
 			List<Byte> bytesToCompare) {
-		for (Map.Entry<Byte, Object> entry : current.entrySet()) {
+		Set<Map.Entry<Byte, Object>> setSize = current.entrySet();
+		for (Map.Entry<Byte, Object> entry : setSize) {
 			Byte b = entry.getKey();
 			if (i == len - 1) {
 				append(lines, "if (");
-				for (int j = 0; j < bytesToCompare.size(); j++) {
+				int size = bytesToCompare.size();
+				for (int j = 0; j < size; j++) {
 					Byte a = bytesToCompare.get(j);
 					append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
 				}
@@ -121,7 +123,8 @@ class CodegenImplEnum {
 				continue;
 			}
 			append(lines, "if (");
-			for (int j = 0; j < bytesToCompare.size(); j++) {
+			int size = bytesToCompare.size();
+			for (int j = 0; j < size; j++) {
 				Byte a = bytesToCompare.get(j);
 				append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
 			}

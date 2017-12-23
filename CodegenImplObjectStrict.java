@@ -4,6 +4,7 @@ import com.jsoniter.spi.*;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.Map.Entry;
 
 import static com.jsoniter.CodegenImplObjectHash.appendVarDef;
 import static com.jsoniter.CodegenImplObjectHash.appendWrappers;
@@ -329,11 +330,14 @@ class CodegenImplObjectStrict {
 
 	private static void addFieldDispatch(StringBuilder lines, int len, int i, Map<Byte, Object> current,
 			List<Byte> bytesToCompare) {
-		for (Map.Entry<Byte, Object> entry : current.entrySet()) {
+		int size = 0;
+		Set<Entry<Byte, Object>> setSize = current.entrySet();
+		for (Map.Entry<Byte, Object> entry : setSize) {
 			Byte b = entry.getKey();
 			if (i == len - 1) {
 				append(lines, "if (");
-				for (int j = 0; j < bytesToCompare.size(); j++) {
+				size = bytesToCompare.size();
+				for (int j = 0; j < size; j++) {
 					Byte a = bytesToCompare.get(j);
 					append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
 				}
@@ -384,7 +388,8 @@ class CodegenImplObjectStrict {
 				continue;
 			}
 			append(lines, "if (");
-			for (int j = 0; j < bytesToCompare.size(); j++) {
+			size = bytesToCompare.size();
+			for (int j = 0; j < size; j++) {
 				Byte a = bytesToCompare.get(j);
 				append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
 			}

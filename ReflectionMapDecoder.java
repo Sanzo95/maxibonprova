@@ -4,6 +4,7 @@ import com.jsoniter.spi.*;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.Map;
 
@@ -40,7 +41,8 @@ class ReflectionMapDecoder implements Decoder {
 		}
 	}
 
-	private Object decode_(JsonIterator iter) throws Exception {
+	private Object decode_(JsonIterator iter) throws IOException, InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException {
 		if (CodegenAccess.resetExistingObject(iter) instanceof Map) {
 			Map map = (Map) CodegenAccess.resetExistingObject(iter);
 			if (iter.readNull()) {
@@ -52,14 +54,15 @@ class ReflectionMapDecoder implements Decoder {
 			if (!CodegenAccess.readObjectStart(iter)) {
 				return map;
 			}
+			byte b;
 			do {
 				Object decodedMapKey = readMapKey(iter);
 				map.put(decodedMapKey, valueTypeDecoder.decode(iter));
-			} while (CodegenAccess.nextToken(iter) == ',');
+				b = CodegenAccess.nextToken(iter);
+			} while (b == ',');
 			return map;
-		} else {
-			throw new Exception();
-		}
+		} else
+			return null;
 	}
 
 	private Object readMapKey(JsonIterator iter) throws IOException {
