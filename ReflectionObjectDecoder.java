@@ -431,13 +431,13 @@ class ReflectionObjectDecoder {
 
 	private void applyWrappers(Object[] temp, Object obj)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		int size;
+		int size = 0;
 		for (WrapperDescriptor wrapper : desc.bindingTypeWrappers) {
 			size = wrapper.parameters.size();
 			Object[] args = new Object[wrapper.parameters.size()];
 			for (int i = 0; i < size; i++) {
 				Object arg = temp[wrapper.parameters.get(i).idx];
-				if (arg != NOT_SET) {
+				if (!arg.equals(NOT_SET)) {
 					args[i] = arg;
 				}
 			}
