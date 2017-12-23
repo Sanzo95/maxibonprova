@@ -54,7 +54,7 @@ class ReflectionMapDecoder implements Decoder {
 			if (!CodegenAccess.readObjectStart(iter)) {
 				return map;
 			}
-			byte b;
+			byte b = 0;
 			do {
 				Object decodedMapKey = readMapKey(iter);
 				map.put(decodedMapKey, valueTypeDecoder.decode(iter));

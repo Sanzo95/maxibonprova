@@ -26,8 +26,6 @@ class CodegenImplEnum {
 
 				if (trieTree.get(fromNameBytes.length) instanceof Map<?, ?>) {
 					current = (Map<Byte, Object>) trieTree.get(fromNameBytes.length);
-				} else {
-					throw new Exception();
 				}
 
 				if (current == null) {
@@ -41,8 +39,6 @@ class CodegenImplEnum {
 
 						if (current.get(b) instanceof Map<?, ?>) {
 							next = (Map<Byte, Object>) current.get(b);
-						} else {
-							throw new Exception();
 						}
 
 						if (next == null) {
@@ -76,8 +72,6 @@ class CodegenImplEnum {
 
 				if (entry.getValue() instanceof Map<?, ?>) {
 					current = (Map<Byte, Object>) entry.getValue();
-				} else {
-					throw new Exception();
 				}
 
 				addFieldDispatch(switchBody, len, 0, current, new ArrayList<Byte>());
@@ -115,8 +109,6 @@ class CodegenImplEnum {
 
 				if (entry.getValue() instanceof Map<?, ?>) {
 					next = (Map<Byte, Object>) entry.getValue();
-				} else {
-					throw new Exception();
 				}
 
 				if (next.size() == 1) {

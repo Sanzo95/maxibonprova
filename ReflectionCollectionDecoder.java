@@ -6,6 +6,7 @@ import com.jsoniter.spi.TypeLiteral;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
@@ -33,7 +34,8 @@ class ReflectionCollectionDecoder implements Decoder {
 		}
 	}
 
-	private Object decode_(JsonIterator iter) throws Exception {
+	private Object decode_(JsonIterator iter) throws InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException, IOException {
 		if (CodegenAccess.resetExistingObject(iter) instanceof Collection) {
 			Collection col = (Collection) CodegenAccess.resetExistingObject(iter);
 			if (iter.readNull()) {
@@ -50,8 +52,7 @@ class ReflectionCollectionDecoder implements Decoder {
 				flag = iter.readArray();
 			}
 			return col;
-		} else {
-			throw new Exception();
-		}
+		} else
+			return null;
 	}
 }
