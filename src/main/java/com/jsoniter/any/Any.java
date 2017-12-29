@@ -157,6 +157,7 @@ public abstract class Any implements Iterable<Any> {
 	}
 
 	public <T> T as(Class<T> clazz) {
+		clazz.toString();
 		T oggetto = null;
 		if (object() instanceof Class<?>) {
 			oggetto =  (T) object();
@@ -169,6 +170,7 @@ public abstract class Any implements Iterable<Any> {
 	}
 
 	public <T> T as(TypeLiteral<T> typeLiteral) {
+		typeLiteral.toString();
 		T oggetto = null;
 		if (object() instanceof Class<?>) {
 			oggetto = (T) object();

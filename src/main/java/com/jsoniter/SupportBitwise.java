@@ -118,7 +118,8 @@ public class SupportBitwise {
 		}
 		for (int i = newLong.length() - 1; i >= 0; i--) {
 			if (newLong.charAt(i) == uno) {
-				l = new Double(Math.pow(2, newLong.length() - 1 - i)).longValue() + l;
+				Double dTemp = Math.pow(2, newLong.length() - 1 - i);
+				l = Long.valueOf(dTemp.longValue()) + l;
 			}
 		}
 		return l;

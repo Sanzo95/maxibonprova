@@ -101,6 +101,7 @@ class ReflectionObjectDecoder {
 		tempIdx++;
 	}
 
+	//Make methods static if they do not use instance class members ERROR
 	public Decoder create() {
 		if (desc.ctor.parameters.isEmpty()) {
 			if (desc.bindingTypeWrappers.isEmpty()) {
@@ -361,8 +362,8 @@ class ReflectionObjectDecoder {
 			}
 		}
 	}
-
-	private void setToBinding(Object obj, Binding binding, Object value)
+	//Make methods static if they do not use instance class members
+	private static void setToBinding(Object obj, Binding binding, Object value)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		if (binding.field != null) {
 			binding.field.set(obj, value);
@@ -392,15 +393,18 @@ class ReflectionObjectDecoder {
 		}
 	}
 
-	private boolean canNotSetDirectly(Binding binding) {
+	//Make methods static if they do not use instance class members
+	private static boolean canNotSetDirectly(Binding binding) {
 		return binding.field == null && binding.method == null;
 	}
 
-	private Object decodeBinding(JsonIterator iter, Binding binding) throws IOException {
+	//Make methods static if they do not use instance class members
+	private static Object decodeBinding(JsonIterator iter, Binding binding) throws IOException {
 		Object value = binding.decoder.decode(iter);
 		return value;
 	}
 
+	//Make methods static if they do not use instance class members ERROR
 	private Object decodeBinding(JsonIterator iter, Object obj, Binding binding)
 			throws IllegalArgumentException, IllegalAccessException, IOException {
 		if (binding.valueCanReuse) {
@@ -409,6 +413,7 @@ class ReflectionObjectDecoder {
 		return decodeBinding(iter, binding);
 	}
 
+	//Make methods static if they do not use instance class members ERROR
 	private Map<String, Object> onUnknownProperty(JsonIterator iter, Slice fieldName, Map<String, Object> extra)
 			throws IOException {
 		boolean shouldReadValue = desc.asExtraForUnknownProperties || !desc.keyValueTypeWrappers.isEmpty();
@@ -435,6 +440,7 @@ class ReflectionObjectDecoder {
 		return missingFields;
 	}
 
+//Make methods static if they do not use instance class members ERROR
 	private void applyWrappers(Object[] temp, Object obj)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		int size = 0;
@@ -478,6 +484,7 @@ class ReflectionObjectDecoder {
 
 	}
 
+	//Make methods static if they do not use instance class members ERROR
 	private Object createNewObject(Object... args)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
 		if (desc.ctor.objectFactory != null) {
