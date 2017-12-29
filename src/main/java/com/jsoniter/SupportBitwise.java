@@ -1,6 +1,7 @@
 package com.jsoniter;
 
 public class SupportBitwise {
+	//errore kiuwan, serve costruttore anche se privato e inutilizzato
 	private SupportBitwise() {
 
 	}

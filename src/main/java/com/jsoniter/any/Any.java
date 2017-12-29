@@ -9,7 +9,7 @@ import com.jsoniter.spi.TypeLiteral;
 
 import java.io.IOException;
 import java.util.*;
-
+ 
 public abstract class Any implements Iterable<Any> {
 
 	static {
