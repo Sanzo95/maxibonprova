@@ -61,8 +61,7 @@ class StringLazyAny extends LazyAny {
 			CodegenAccess.nextToken(iter);
 			return iter.readInt();
 		} catch (IOException e) {
-			String s = e.getMessage();
-			throw new JsonException("error");
+			throw new JsonException("Error: IOException");
 		} finally {
 			JsonIteratorPool.returnJsonIterator(iter);
 		}
@@ -75,7 +74,7 @@ class StringLazyAny extends LazyAny {
 			CodegenAccess.nextToken(iter);
 			return iter.readLong();
 		} catch (IOException e) {
-			throw new JsonException("IOException");
+			throw new JsonException("Error: IOException");
 		} finally {
 			JsonIteratorPool.returnJsonIterator(iter);
 		}
@@ -88,7 +87,7 @@ class StringLazyAny extends LazyAny {
 			CodegenAccess.nextToken(iter);
 			return iter.readFloat();
 		} catch (IOException e) {
-			throw new JsonException("IOException");
+			throw new JsonException("Error: IOException");
 		} finally {
 			JsonIteratorPool.returnJsonIterator(iter);
 		}
@@ -101,7 +100,7 @@ class StringLazyAny extends LazyAny {
 			CodegenAccess.nextToken(iter);
 			return iter.readDouble();
 		} catch (IOException e) {
-			throw new JsonException("IOException");
+			throw new JsonException("Error: IOException");
 		} finally {
 			JsonIteratorPool.returnJsonIterator(iter);
 		}
