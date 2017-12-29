@@ -13,6 +13,11 @@ class CodegenImplObjectStrict {
 	private static int SBSIZE = 128;
 
 	final static Map<String, String> DEFAULT_VALUES = new HashMap<String, String>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 7389282851528177046L;
+
 		{
 			put("float", "0.0f");
 			put("double", "0.0d");

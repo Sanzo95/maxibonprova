@@ -8,7 +8,6 @@ import com.google.gson.annotations.SerializedName;
 import com.jsoniter.extra.GsonCompatibilityMode;
 import com.jsoniter.spi.DecodingMode;
 import com.jsoniter.spi.JsoniterSpi;
-import org.junit.Test;
 import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.BenchmarkParams;
@@ -66,12 +65,6 @@ public class BenchGson {
             stream.close();
         }
     }
-
-//
-//    @Benchmark
-//    public void jsoniterDynamicCodegenDecoder(Blackhole bh) throws IOException {
-//        bh.consume(JsonIterator.deserialize(gsonCompatibilityMode, json, BagOfPrimitives.class));
-//    }
 
     public static void main(String[] args) throws Exception {
         Main.main(new String[]{

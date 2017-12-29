@@ -7,7 +7,12 @@ import java.util.*;
 
 class CodegenImplArray {
 	private static int SBSIZE = 128;
-    final static Set<Class> WITH_CAPACITY_COLLECTION_CLASSES = new HashSet<Class>() {{
+    final static Set<Class> WITH_CAPACITY_COLLECTION_CLASSES = new HashSet<Class>() {/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1723371799837389402L;
+
+	{
         add(ArrayList.class);
         add(HashSet.class);
         add(Vector.class);

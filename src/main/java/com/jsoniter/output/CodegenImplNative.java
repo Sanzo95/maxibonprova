@@ -16,6 +16,11 @@ import java.util.Map;
 
 class CodegenImplNative {
 	public static final Map<Type, Encoder.ReflectionEncoder> NATIVE_ENCODERS = new IdentityHashMap<Type, Encoder.ReflectionEncoder>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		{
 			put(boolean.class, new Encoder.ReflectionEncoder() {
 				@Override

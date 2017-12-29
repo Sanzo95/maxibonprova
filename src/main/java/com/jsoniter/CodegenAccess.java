@@ -1,6 +1,5 @@
 package com.jsoniter;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.jsoniter.spi.*;
 
 import java.io.IOException;
