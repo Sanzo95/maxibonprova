@@ -1,16 +1,52 @@
 package com.jsoniter;
 
+/**
+ * classe di supporto per risolvere il problema di affidabilità "Avoid using
+ * bitwise operators to make comparisons"
+ * 
+ * @author Francesco
+ */
 public class SupportBitwise {
+	/**
+	 * costruttore privato, richiesto da kiuwan
+	 */
 	private SupportBitwise() {
-
 	}
 
-	private final static char zero = '0';
-	private final static char uno = '1';
+	/**
+	 * 
+	 */
+	private final static char ZERO = '0';
+	/**
+	 * 
+	 */
+	private final static char UNO = '1';
+	/**
+	 * 
+	 */
+	private final static int DUE = 2;
 
-	/*
-	 * "Avoid using bitwise operators to make comparisons", this method fixes the
-	 * boolean problem.
+	/**
+	 * Metodo di supporto per ridurre la complessità ciclomatica nel metodo che
+	 * restituisce una variabile boolean
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @param index1
+	 * @param index2
+	 * @return
+	 */
+	private static boolean cyclomaticComplexity1(String bin1, String bin2, int index1, int index2) {
+		return ((bin1.charAt(index1) != bin2.charAt(index2)) || (Character.getNumericValue(bin1.charAt(index1)) == 0)
+				&& (Character.getNumericValue(bin2.charAt(index2)) == 0));
+	}
+
+	/**
+	 * Metodo per bitwise utilizzato negli if
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @return
 	 */
 	public static boolean bitwise(String bin1, String bin2) {
 		boolean flag = false;
@@ -19,21 +55,16 @@ public class SupportBitwise {
 		if (l1 <= l2) {
 			for (int i = l1 - 1; i >= 0; i--) {
 				l2--;
-				if ((bin1.charAt(i) != bin2.charAt(l2)) || (Character.getNumericValue(bin1.charAt(i)) == 0)
-						&& (Character.getNumericValue(bin2.charAt(l2)) == 0)) {
-					flag = true;
-				} else {
-					flag = false;
+				flag = cyclomaticComplexity1(bin1, bin2, i, l2);
+				if (!(flag)) {
 					break;
 				}
 			}
 		} else {
 			for (int i = l2 - 1; i >= 0; i--) {
 				l1--;
-				if ((bin1.charAt(l1) != bin2.charAt(i)) || (Character.getNumericValue(bin1.charAt(l1)) == 0) && (Character.getNumericValue(bin2.charAt(i)) == 0)) {
-					flag = true;
-				} else {
-					flag = false;
+				flag = cyclomaticComplexity1(bin1, bin2, l1, i);
+				if (!(flag)) {
 					break;
 				}
 			}
@@ -41,9 +72,91 @@ public class SupportBitwise {
 		return flag;
 	}
 
-	/*
-	 * "Avoid using bitwise operators to make comparisons", this method fixes the
-	 * long problem.
+	/**
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @param index1
+	 * @param index2
+	 * @return
+	 */
+	private static boolean cyclomaticComplexity2(String bin1, String bin2, int index1, int index2) {
+		return ((Character.getNumericValue(bin1.charAt(index1)) == 0
+				&& Character.getNumericValue(bin2.charAt(index2)) == 1)
+				|| (Character.getNumericValue(bin1.charAt(index1)) == 1
+						&& Character.getNumericValue(bin2.charAt(index2)) == 0));
+	}
+
+	/**
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @param index1
+	 * @param index2
+	 * @param value
+	 * @return
+	 */
+	private static boolean cyclomaticComplexity3(String bin1, String bin2, int index1, int index2, int value) {
+		return Character.getNumericValue(bin1.charAt(index1)) == value
+				&& Character.getNumericValue(bin2.charAt(index2)) == value;
+	}
+
+	/**
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @param l1
+	 * @param l2
+	 * @return
+	 */
+	private static String equalsLength(String bin1, String bin2, int l1, int l2) {
+		String toReturn = "";
+		int j = Math.max(l1, l2) - Math.min(l1, l2);
+		while (j >= 0) {
+			if (l1 > l2) {
+				toReturn = "bin2";
+				bin2 = '0' + bin2;
+				l2++;
+			} else if (l1 < l2) {
+				toReturn = "bin1";
+				bin1 = '0' + bin1;
+				l1++;
+			} else {
+				break;
+			}
+			j--;
+		}
+		if ("bin1".equals(toReturn)) {
+			toReturn = bin1;
+		} else if ("bin2".equals(toReturn)) {
+			toReturn = bin2;
+		}
+		return toReturn;
+	}
+
+	private static String riempiBinaryString(String bin1, String bin2, char c, String newLong, int index1, int index2) {
+		if ((c == '&') && (cyclomaticComplexity2(bin1, bin2, index1, index2))) {
+			newLong = ZERO + newLong;
+		} else if ((c == '|') && (cyclomaticComplexity2(bin1, bin2, index1, index2))) {
+			newLong = UNO + newLong;
+		}
+
+		if (cyclomaticComplexity3(bin1, bin2, index1, index2, 0)) {
+			newLong = ZERO + newLong;
+		}
+		if (cyclomaticComplexity3(bin1, bin2, index1, index2, 1)) {
+			newLong = UNO + newLong;
+		}
+		return newLong;
+	}
+
+	/**
+	 * Metodo per eseguire bitwise senza errori kiuwan
+	 * 
+	 * @param long1
+	 * @param long2
+	 * @param c
+	 * @return
 	 */
 	public static long bitwise(Long long1, Long long2, char c) {
 		String newLong = "";
@@ -53,51 +166,20 @@ public class SupportBitwise {
 		int l1 = bin1.length();
 		int l2 = bin2.length();
 		if (l1 <= l2) {
-			for (int i = l1 - 1; i >= 0; i--) {
-				l2--;
-				if (c == '&') {
-					if ((Character.getNumericValue(bin1.charAt(i)) == 0 && Character.getNumericValue(bin2.charAt(l2)) == 1) || (Character.getNumericValue(bin1.charAt(i)) == 1 && Character.getNumericValue(bin2.charAt(l2)) == 0)) {
-						newLong = zero + newLong;
-					}
-				} else if (c == '|') {
-					if ((Character.getNumericValue(bin1.charAt(i)) == 0 && Character.getNumericValue(bin2.charAt(l2)) == 1) || (Character.getNumericValue(bin1.charAt(i)) == 1 && Character.getNumericValue(bin2.charAt(l2)) == 0)) {
-						newLong = uno + newLong;
-					}
-				} else {
-					System.out.println(c + " operand not recognized");
-				}
-				if ((Character.getNumericValue(bin1.charAt(i)) == 0 && Character.getNumericValue(bin2.charAt(l2)) == 0)) {
-					newLong = zero + newLong;
-				}
-				if ((Character.getNumericValue(bin1.charAt(i)) == 1 && Character.getNumericValue(bin2.charAt(l2)) == 1)) {
-					newLong = uno + newLong;
-				}
-			}
+			bin1 = equalsLength(bin1, bin2, l1, l2);
+			l1 = bin1.length();
 		} else {
-			for (int i = l2 - 1; i >= 0; i--) {
-				l1--;
-				if (c == '&') {
-					if ((Character.getNumericValue(bin1.charAt(l1)) == 0 && Character.getNumericValue(bin2.charAt(i)) == 1) || (Character.getNumericValue(bin1.charAt(l1)) == 1 && Character.getNumericValue(bin2.charAt(i)) == 0)) {
-						newLong = zero + newLong;
-					}
-				} else if (c == '|') {
-					if ((Character.getNumericValue(bin1.charAt(l1)) == 0 && Character.getNumericValue(bin2.charAt(i)) == 1) || (Character.getNumericValue(bin1.charAt(l1)) == 1 && Character.getNumericValue(bin2.charAt(i)) == 0)) {
-						newLong = uno + newLong;
-					}
-				} else {
-					System.out.println(c + " operand not recognized");
-				}
-				if ((Character.getNumericValue(bin1.charAt(l1)) == 0 && Character.getNumericValue(bin2.charAt(i)) == 0)) {
-					newLong = zero + newLong;
-				}
-				if ((Character.getNumericValue(bin1.charAt(l1)) == 1 && Character.getNumericValue(bin2.charAt(i)) == 1)) {
-					newLong = uno + newLong;
-				}
-			}
+			bin2 = equalsLength(bin1, bin2, l1, l2);
+			l2 = bin2.length();
+		}
+		for (int i = l1 - 1; i >= 0; i--) {
+			l2--;
+			newLong = riempiBinaryString(bin1, bin2, c, newLong, i, l2);
 		}
 		for (int i = newLong.length() - 1; i >= 0; i--) {
-			if (newLong.charAt(i) == uno) {
-				l = new Double(Math.pow(2, newLong.length() - 1 - i)).longValue() + l;
+			if (newLong.charAt(i) == UNO) {
+				Double d = Math.pow(DUE, (newLong.length() - 1) - i);
+				l = Long.valueOf(d.longValue()) + l;
 			}
 		}
 		return l;
