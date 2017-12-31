@@ -1,7 +1,7 @@
 package com.jsoniter;
 
 /**
- * classe di supporto per risolvere il problema di affidabilit‡ "Avoid using
+ * classe di supporto per risolvere il problema di affidabilit√† "Avoid using
  * bitwise operators to make comparisons"
  * 
  * @author Francesco
@@ -27,7 +27,7 @@ public class SupportBitwise {
 	private final static int DUE = 2;
 
 	/**
-	 * Metodo di supporto per ridurre la complessit‡ ciclomatica nel metodo che
+	 * Metodo di supporto per ridurre la complessit√† ciclomatica nel metodo che
 	 * restituisce una variabile boolean
 	 * 
 	 * @param bin1
@@ -134,6 +134,16 @@ public class SupportBitwise {
 		return toReturn;
 	}
 
+	/**
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @param c
+	 * @param newLong
+	 * @param index1
+	 * @param index2
+	 * @return
+	 */
 	private static String riempiBinaryString(String bin1, String bin2, char c, String newLong, int index1, int index2) {
 		if ((c == '&') && (cyclomaticComplexity2(bin1, bin2, index1, index2))) {
 			newLong = ZERO + newLong;
