@@ -48,8 +48,10 @@ public class SupportBitwise {
 	public static long bitwise(Long long1, Long long2, char c) {
 		String newLong = "";
 		long l = 0;
-		String bin1 = Long.toBinaryString(long1), bin2 = Long.toBinaryString(long2);
-		int l1 = bin1.length(), l2 = bin2.length();
+		String bin1 = Long.toBinaryString(long1);
+		String bin2 = Long.toBinaryString(long2);
+		int l1 = bin1.length();
+		int l2 = bin2.length();
 		if (l1 < l2) {
 			bin1 = equalsLength(bin1, bin2, l1, l2);
 			l1 = bin1.length();
@@ -89,15 +91,17 @@ public class SupportBitwise {
 
 	private static String equalsLength(String bin1, String bin2, int l1, int l2) {
 		String toReturn = "";
+		String temp1 = "".concat(bin1);
+		String temp2 = "".concat(bin2);
 		int j = Math.max(l1, l2) - Math.min(l1, l2);
 		while (j >= 0) {
 			if (l1 > l2) {
 				toReturn = "bin2";
-				bin2 = ZEROSTRING.substring(0, 1).concat(bin2);
+				temp2 = ZEROSTRING.substring(0, 1).concat(temp2);
 				l2++;
 			} else if (l1 < l2) {
 				toReturn = "bin1";
-				bin1 = ZEROSTRING.substring(0, 1).concat(bin1);
+				temp1 = ZEROSTRING.substring(0, 1).concat(temp1);
 				l1++;
 			} else {
 				break;
@@ -105,9 +109,9 @@ public class SupportBitwise {
 			j--;
 		}
 		if ("bin1".equals(toReturn)) {
-			toReturn = bin1;
+			toReturn = temp1;
 		} else if ("bin2".equals(toReturn)) {
-			toReturn = bin2;
+			toReturn = temp2;
 		}
 		return toReturn;
 	}
