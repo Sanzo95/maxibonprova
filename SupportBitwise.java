@@ -37,8 +37,8 @@ public class SupportBitwise {
 	 * @return
 	 */
 	private static boolean cyclomaticComplexity1(String bin1, String bin2, int index1, int index2) {
-		return ((bin1.charAt(index1) != bin2.charAt(index2)) || (Character.getNumericValue(bin1.charAt(index1)) == 0)
-				&& (Character.getNumericValue(bin2.charAt(index2)) == 0));
+		return ((bin1.charAt(index1) != bin2.charAt(index2))
+				|| (charNumericValue(bin1, index1) == 0) && (charNumericValue(bin2, index2) == 0));
 	}
 
 	/**
@@ -81,10 +81,18 @@ public class SupportBitwise {
 	 * @return
 	 */
 	private static boolean cyclomaticComplexity2(String bin1, String bin2, int index1, int index2) {
-		return ((Character.getNumericValue(bin1.charAt(index1)) == 0
-				&& Character.getNumericValue(bin2.charAt(index2)) == 1)
-				|| (Character.getNumericValue(bin1.charAt(index1)) == 1
-						&& Character.getNumericValue(bin2.charAt(index2)) == 0));
+		return ((charNumericValue(bin1, index1) == 0 && charNumericValue(bin2, index2) == 1)
+				|| (charNumericValue(bin1, index1) == 1 && charNumericValue(bin2, index2) == 0));
+	}
+
+	/**
+	 * 
+	 * @param bin
+	 * @param index
+	 * @return
+	 */
+	private static int charNumericValue(String bin, int index) {
+		return Character.getNumericValue(bin.charAt(index));
 	}
 
 	/**
@@ -97,8 +105,7 @@ public class SupportBitwise {
 	 * @return
 	 */
 	private static boolean cyclomaticComplexity3(String bin1, String bin2, int index1, int index2, int value) {
-		return Character.getNumericValue(bin1.charAt(index1)) == value
-				&& Character.getNumericValue(bin2.charAt(index2)) == value;
+		return charNumericValue(bin1, index1) == value && charNumericValue(bin2, index2) == value;
 	}
 
 	/**
