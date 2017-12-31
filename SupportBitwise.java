@@ -1,5 +1,4 @@
 package com.jsoniter;
-
 /**
  * classe di supporto per risolvere il problema di affidabilità "Avoid using
  * bitwise operators to make comparisons"
