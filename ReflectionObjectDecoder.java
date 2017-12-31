@@ -444,7 +444,8 @@ class ReflectionObjectDecoder {
 				setToBinding(obj, desc.onExtraProperties, extra);
 			}
 		}
-		for (Method wrapper : desc.keyValueTypeWrappers) {
+		List<Method> list = desc.keyValueTypeWrappers;
+		for (Method wrapper : list) {
 			for (Map.Entry<String, Object> entry : extra.entrySet()) {
 				if (entry.getValue() instanceof Any) {
 					Any value = (Any) entry.getValue();
