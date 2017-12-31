@@ -1,9 +1,10 @@
 package com.jsoniter.any;
 
 import com.jsoniter.output.CodegenAccess;
+import com.jsoniter.spi.JsonException;
 import com.jsoniter.ValueType;
 import com.jsoniter.output.JsonStream;
-import com.jsoniter.spi.*;
+import com.jsoniter.spi.TypeLiteral;
 
 import java.io.IOException;
 import java.util.*;
@@ -17,7 +18,7 @@ import java.util.*;
 public abstract class Any implements Iterable<Any> {
 
 	static {
-		Encoder.ReflectionEncoder anyEncoder = new Encoder.ReflectionEncoder() {
+		com.jsoniter.spi.Encoder.ReflectionEncoder anyEncoder = new com.jsoniter.spi.Encoder.ReflectionEncoder() {
 			@Override
 			public void encode(Object obj, JsonStream stream) throws IOException {
 				Any any = null;
