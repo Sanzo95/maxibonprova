@@ -13,14 +13,29 @@ public class SupportBitwise {
 	private SupportBitwise() {
 	}
 
+	/**
+	 * 
+	 */
 	private final static char UNO = '1';
-
+	/**
+	 * 
+	 */
 	private final static int DUE = 2;
-
+	/**
+	 * 
+	 */
 	private final static String ZEROSTRING = "00";
-
+	/**
+	 * 
+	 */
 	private final static String UNOSTRING = "11";
 
+	/**
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @return
+	 */
 	public static boolean bitwise(String bin1, String bin2) {
 		boolean flag = false;
 		int l1 = bin1.length();
@@ -45,6 +60,13 @@ public class SupportBitwise {
 		return flag;
 	}
 
+	/**
+	 * 
+	 * @param long1
+	 * @param long2
+	 * @param c
+	 * @return
+	 */
 	public static long bitwise(Long long1, Long long2, char c) {
 		String newLong = "";
 		long l = 0;
@@ -71,24 +93,63 @@ public class SupportBitwise {
 		return l;
 	}
 
+	/**
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @param index1
+	 * @param index2
+	 * @return
+	 */
 	private static boolean cyclomaticComplexity1(String bin1, String bin2, int index1, int index2) {
 		return ((bin1.charAt(index1) != bin2.charAt(index2))
 				|| (charNumericValue(bin1, index1) == 0) && (charNumericValue(bin2, index2) == 0));
 	}
 
+	/**
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @param index1
+	 * @param index2
+	 * @return
+	 */
 	private static boolean cyclomaticComplexity2(String bin1, String bin2, int index1, int index2) {
 		return ((charNumericValue(bin1, index1) == 0 && charNumericValue(bin2, index2) == 1)
 				|| (charNumericValue(bin1, index1) == 1 && charNumericValue(bin2, index2) == 0));
 	}
 
+	/**
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @param index1
+	 * @param index2
+	 * @param value
+	 * @return
+	 */
 	private static boolean cyclomaticComplexity3(String bin1, String bin2, int index1, int index2, int value) {
 		return charNumericValue(bin1, index1) == value && charNumericValue(bin2, index2) == value;
 	}
 
+	/**
+	 * 
+	 * @param bin
+	 * @param index
+	 * @return
+	 */
 	private static int charNumericValue(String bin, int index) {
 		return Character.getNumericValue(bin.charAt(index));
 	}
 
+	/**
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @param l1
+	 * @param l2
+	 * @return
+	 */
 	private static String equalsLength(String bin1, String bin2, int l1, int l2) {
 		String toReturn = "";
 		String temp1 = "".concat(bin1);
@@ -116,6 +177,16 @@ public class SupportBitwise {
 		return toReturn;
 	}
 
+	/**
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @param c
+	 * @param newLong
+	 * @param index1
+	 * @param index2
+	 * @return
+	 */
 	private static String riempiBinaryString(String bin1, String bin2, char c, String newLong, int index1, int index2) {
 		if ((c == '&') && (cyclomaticComplexity2(bin1, bin2, index1, index2))) {
 			newLong = ZEROSTRING.substring(0, 1).concat(newLong);
