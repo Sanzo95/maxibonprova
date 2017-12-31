@@ -1,5 +1,4 @@
 package com.jsoniter;
-
 /**
  * classe di supporto per risolvere il problema di affidabilità "Avoid using
  * bitwise operators to make comparisons"
@@ -134,6 +133,16 @@ public class SupportBitwise {
 		return toReturn;
 	}
 
+	/**
+	 * 
+	 * @param bin1
+	 * @param bin2
+	 * @param c
+	 * @param newLong
+	 * @param index1
+	 * @param index2
+	 * @return
+	 */
 	private static String riempiBinaryString(String bin1, String bin2, char c, String newLong, int index1, int index2) {
 		if ((c == '&') && (cyclomaticComplexity2(bin1, bin2, index1, index2))) {
 			newLong = ZERO + newLong;
@@ -178,8 +187,7 @@ public class SupportBitwise {
 		}
 		for (int i = newLong.length() - 1; i >= 0; i--) {
 			if (newLong.charAt(i) == UNO) {
-				Double d = Math.pow(DUE, (newLong.length() - 1) - i);
-				l = Long.valueOf(d.longValue()) + l;
+				l = Long.valueOf(Double.valueOf( Math.pow(DUE, (newLong.length() - 1) - i)).longValue()) + l;
 			}
 		}
 		return l;
