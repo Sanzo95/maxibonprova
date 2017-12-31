@@ -13,55 +13,22 @@ public class SupportBitwise {
 	private SupportBitwise() {
 	}
 
-	/**
-	 * 
-	 */
 	private final static char UNO = '1';
-	/**
-	 * 
-	 */
+
 	private final static int DUE = 2;
-	/**
-	 * 
-	 */
-	private static String bin1 = "";
-	/**
-	 * 
-	 */
-	private static String bin2 = "";
-	/**
-	 * 
-	 */
-	private static Integer l1 = 0;
-	/**
-	 * 
-	 */
-	private static Integer l2 = 0;
-	/**
-	 * 
-	 */
+
 	private final static String ZEROSTRING = "00";
-	/**
-	 * 
-	 */
+
 	private final static String UNOSTRING = "11";
 
-	/**
-	 * 
-	 * @param bin1
-	 * @param bin2
-	 * @return
-	 */
-	public static boolean bitwise(String s1, String s2) {
+	public static boolean bitwise(String bin1, String bin2) {
 		boolean flag = false;
-		SupportBitwise.bin1 = s1;
-		SupportBitwise.bin2 = s2;
-		l1 = bin1.length();
-		l2 = bin2.length();
+		int l1 = bin1.length();
+		int l2 = bin2.length();
 		if (l1 <= l2) {
 			for (int i = l1 - 1; i >= 0; i--) {
 				l2--;
-				flag = cyclomaticComplexity1(i, l2);
+				flag = cyclomaticComplexity1(bin1, bin2, i, l2);
 				if (!(flag)) {
 					break;
 				}
@@ -69,7 +36,7 @@ public class SupportBitwise {
 		} else {
 			for (int i = l2 - 1; i >= 0; i--) {
 				l1--;
-				flag = cyclomaticComplexity1(l1, i);
+				flag = cyclomaticComplexity1(bin1, bin2, l1, i);
 				if (!(flag)) {
 					break;
 				}
@@ -78,30 +45,21 @@ public class SupportBitwise {
 		return flag;
 	}
 
-	/**
-	 * 
-	 * @param long1
-	 * @param long2
-	 * @param c
-	 * @return
-	 */
 	public static long bitwise(Long long1, Long long2, char c) {
 		String newLong = "";
 		long l = 0;
-		bin1 = Long.toBinaryString(long1);
-		bin2 = Long.toBinaryString(long2);
-		l1 = bin1.length();
-		l2 = bin2.length();
+		String bin1 = Long.toBinaryString(long1), bin2 = Long.toBinaryString(long2);
+		int l1 = bin1.length(), l2 = bin2.length();
 		if (l1 < l2) {
-			bin1 = equalsLength();
+			bin1 = equalsLength(bin1, bin2, l1, l2);
 			l1 = bin1.length();
 		} else if (l1 > l2) {
-			bin2 = equalsLength();
+			bin2 = equalsLength(bin1, bin2, l1, l2);
 			l2 = bin2.length();
 		}
 		for (int i = l1 - 1; i >= 0; i--) {
 			l2--;
-			newLong = riempiBinaryString(c, newLong, i, l2);
+			newLong = riempiBinaryString(bin1, bin2, c, newLong, i, l2);
 		}
 		for (int i = newLong.length() - 1; i >= 0; i--) {
 			if (newLong.charAt(i) == UNO) {
@@ -111,53 +69,25 @@ public class SupportBitwise {
 		return l;
 	}
 
-	/**
-	 * 
-	 * @param index1
-	 * @param index2
-	 * @return
-	 */
-	private static boolean cyclomaticComplexity1(int index1, int index2) {
-		return ((bin1.charAt(index1) != bin2.charAt(index2)) || cyclomaticComplexity3(index1, index2, 0));
+	private static boolean cyclomaticComplexity1(String bin1, String bin2, int index1, int index2) {
+		return ((bin1.charAt(index1) != bin2.charAt(index2))
+				|| (charNumericValue(bin1, index1) == 0) && (charNumericValue(bin2, index2) == 0));
 	}
 
-	/**
-	 * 
-	 * @param index1
-	 * @param index2
-	 * @return
-	 */
-	private static boolean cyclomaticComplexity2(int index1, int index2) {
+	private static boolean cyclomaticComplexity2(String bin1, String bin2, int index1, int index2) {
 		return ((charNumericValue(bin1, index1) == 0 && charNumericValue(bin2, index2) == 1)
 				|| (charNumericValue(bin1, index1) == 1 && charNumericValue(bin2, index2) == 0));
 	}
 
-	/**
-	 * 
-	 * @param index1
-	 * @param index2
-	 * @param value
-	 * @return
-	 */
-	private static boolean cyclomaticComplexity3(int index1, int index2, int value) {
+	private static boolean cyclomaticComplexity3(String bin1, String bin2, int index1, int index2, int value) {
 		return charNumericValue(bin1, index1) == value && charNumericValue(bin2, index2) == value;
 	}
 
-	/**
-	 * 
-	 * @param bin
-	 * @param index
-	 * @return
-	 */
 	private static int charNumericValue(String bin, int index) {
 		return Character.getNumericValue(bin.charAt(index));
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
-	private static String equalsLength() {
+	private static String equalsLength(String bin1, String bin2, int l1, int l2) {
 		String toReturn = "";
 		int j = Math.max(l1, l2) - Math.min(l1, l2);
 		while (j >= 0) {
@@ -182,25 +112,17 @@ public class SupportBitwise {
 		return toReturn;
 	}
 
-	/**
-	 * 
-	 * @param c
-	 * @param newLong
-	 * @param index1
-	 * @param index2
-	 * @return
-	 */
-	private static String riempiBinaryString(char c, String newLong, int index1, int index2) {
-		if ((c == '&') && (cyclomaticComplexity2(index1, index2))) {
+	private static String riempiBinaryString(String bin1, String bin2, char c, String newLong, int index1, int index2) {
+		if ((c == '&') && (cyclomaticComplexity2(bin1, bin2, index1, index2))) {
 			newLong = ZEROSTRING.substring(0, 1).concat(newLong);
-		} else if ((c == '|') && (cyclomaticComplexity2(index1, index2))) {
+		} else if ((c == '|') && (cyclomaticComplexity2(bin1, bin2, index1, index2))) {
 			newLong = UNOSTRING.substring(0, 1).concat(newLong);
 		}
 
-		if (cyclomaticComplexity3(index1, index2, 0)) {
+		if (cyclomaticComplexity3(bin1, bin2, index1, index2, 0)) {
 			newLong = ZEROSTRING.substring(0, 1).concat(newLong);
 		}
-		if (cyclomaticComplexity3(index1, index2, 1)) {
+		if (cyclomaticComplexity3(bin1, bin2, index1, index2, 1)) {
 			newLong = UNOSTRING.substring(0, 1).concat(newLong);
 		}
 		return newLong;
