@@ -1,4 +1,5 @@
 package com.jsoniter;
+
 /**
  * classe di supporto per risolvere il problema di affidabilità "Avoid using
  * bitwise operators to make comparisons"
@@ -174,10 +175,10 @@ public class SupportBitwise {
 		String bin2 = Long.toBinaryString(long2);
 		int l1 = bin1.length();
 		int l2 = bin2.length();
-		if (l1 <= l2) {
+		if (l1 < l2) {
 			bin1 = equalsLength(bin1, bin2, l1, l2);
 			l1 = bin1.length();
-		} else {
+		} else if (l1 > l2) {
 			bin2 = equalsLength(bin1, bin2, l1, l2);
 			l2 = bin2.length();
 		}
@@ -187,7 +188,7 @@ public class SupportBitwise {
 		}
 		for (int i = newLong.length() - 1; i >= 0; i--) {
 			if (newLong.charAt(i) == UNO) {
-				l = Long.valueOf(Double.valueOf( Math.pow(DUE, (newLong.length() - 1) - i)).longValue()) + l;
+				l = Long.valueOf(Double.valueOf(Math.pow(DUE, (newLong.length() - 1) - i)).longValue()) + l;
 			}
 		}
 		return l;
