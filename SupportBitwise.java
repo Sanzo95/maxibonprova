@@ -16,10 +16,6 @@ public class SupportBitwise {
 	/**
 	 * 
 	 */
-	private final static char ZERO = '0';
-	/**
-	 * 
-	 */
 	private final static char UNO = '1';
 	/**
 	 * 
@@ -36,15 +32,19 @@ public class SupportBitwise {
 	/**
 	 * 
 	 */
-	private static int l1 = 0;
+	private static Integer l1 = 0;
 	/**
 	 * 
 	 */
-	private static int l2 = 0;
+	private static Integer l2 = 0;
 	/**
 	 * 
 	 */
-	private final static String zero = "00";
+	private final static String ZEROSTRING = "00";
+	/**
+	 * 
+	 */
+	private final static String UNOSTRING = "11";
 
 	/**
 	 * 
@@ -52,12 +52,12 @@ public class SupportBitwise {
 	 * @param bin2
 	 * @return
 	 */
-	public static boolean bitwise(String bin1, String bin2) {
+	public static boolean bitwise(String s1, String s2) {
 		boolean flag = false;
-		SupportBitwise.bin1 = bin1;
-		SupportBitwise.bin2 = bin2;
-		int l1 = bin1.length();
-		int l2 = bin2.length();
+		SupportBitwise.bin1 = s1;
+		SupportBitwise.bin2 = s2;
+		l1 = bin1.length();
+		l2 = bin2.length();
 		if (l1 <= l2) {
 			for (int i = l1 - 1; i >= 0; i--) {
 				l2--;
@@ -118,8 +118,7 @@ public class SupportBitwise {
 	 * @return
 	 */
 	private static boolean cyclomaticComplexity1(int index1, int index2) {
-		return ((bin1.charAt(index1) != bin2.charAt(index2))
-				|| (charNumericValue(bin1, index1) == 0) && (charNumericValue(bin2, index2) == 0));
+		return ((bin1.charAt(index1) != bin2.charAt(index2)) || cyclomaticComplexity3(index1, index2, 0));
 	}
 
 	/**
@@ -164,11 +163,11 @@ public class SupportBitwise {
 		while (j >= 0) {
 			if (l1 > l2) {
 				toReturn = "bin2";
-				bin2 = zero.substring(0, 1).concat(bin2);
+				bin2 = ZEROSTRING.substring(0, 1).concat(bin2);
 				l2++;
 			} else if (l1 < l2) {
 				toReturn = "bin1";
-				bin1 = zero.substring(0, 1).concat(bin1);
+				bin1 = ZEROSTRING.substring(0, 1).concat(bin1);
 				l1++;
 			} else {
 				break;
@@ -193,16 +192,16 @@ public class SupportBitwise {
 	 */
 	private static String riempiBinaryString(char c, String newLong, int index1, int index2) {
 		if ((c == '&') && (cyclomaticComplexity2(index1, index2))) {
-			newLong = ZERO + newLong;
+			newLong = ZEROSTRING.substring(0, 1).concat(newLong);
 		} else if ((c == '|') && (cyclomaticComplexity2(index1, index2))) {
-			newLong = UNO + newLong;
+			newLong = UNOSTRING.substring(0, 1).concat(newLong);
 		}
 
 		if (cyclomaticComplexity3(index1, index2, 0)) {
-			newLong = ZERO + newLong;
+			newLong = ZEROSTRING.substring(0, 1).concat(newLong);
 		}
 		if (cyclomaticComplexity3(index1, index2, 1)) {
-			newLong = UNO + newLong;
+			newLong = UNOSTRING.substring(0, 1).concat(newLong);
 		}
 		return newLong;
 	}
