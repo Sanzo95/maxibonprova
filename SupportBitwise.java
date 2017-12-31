@@ -75,15 +75,14 @@ public class SupportBitwise {
 		int l1 = bin1.length();
 		int l2 = bin2.length();
 		if (l1 < l2) {
-			bin1 = equalsLength(bin1, bin2, l1, l2);
+			bin1 = equalsLength(bin1, bin2);
 			l1 = bin1.length();
 		} else if (l1 > l2) {
-			bin2 = equalsLength(bin1, bin2, l1, l2);
+			bin2 = equalsLength(bin1, bin2);
 			l2 = bin2.length();
 		}
 		for (int i = l1 - 1; i >= 0; i--) {
-			l2--;
-			newLong = riempiBinaryString(bin1, bin2, c, newLong, i, l2);
+			newLong = riempiBinaryString(bin1, bin2, c, newLong, i, --l2);
 		}
 		for (int i = newLong.length() - 1; i >= 0; i--) {
 			if (newLong.charAt(i) == UNO) {
@@ -150,12 +149,13 @@ public class SupportBitwise {
 	 * @param l2
 	 * @return
 	 */
-	private static String equalsLength(String bin1, String bin2, int l1, int l2) {
+	private static String equalsLength(String bin1, String bin2) {
 		String toReturn = "";
 		String temp1 = "".concat(bin1);
 		String temp2 = "".concat(bin2);
-		int j = Math.max(l1, l2) - Math.min(l1, l2);
-		while (j >= 0) {
+		int l1 = bin1.length();
+		int l2 = bin2.length();
+		for (int j = Math.max(l1, l2) - Math.min(l1, l2); j >= 0; j--) {
 			if (l1 > l2) {
 				toReturn = "bin2";
 				temp2 = ZEROSTRING.substring(0, 1).concat(temp2);
@@ -164,10 +164,7 @@ public class SupportBitwise {
 				toReturn = "bin1";
 				temp1 = ZEROSTRING.substring(0, 1).concat(temp1);
 				l1++;
-			} else {
-				break;
 			}
-			j--;
 		}
 		if ("bin1".equals(toReturn)) {
 			toReturn = temp1;
@@ -188,19 +185,20 @@ public class SupportBitwise {
 	 * @return
 	 */
 	private static String riempiBinaryString(String bin1, String bin2, char c, String newLong, int index1, int index2) {
+		String newString = newLong;
 		if ((c == '&') && (cyclomaticComplexity2(bin1, bin2, index1, index2))) {
-			newLong = ZEROSTRING.substring(0, 1).concat(newLong);
+			newString = ZEROSTRING.substring(0, 1).concat(newString);
 		} else if ((c == '|') && (cyclomaticComplexity2(bin1, bin2, index1, index2))) {
-			newLong = UNOSTRING.substring(0, 1).concat(newLong);
+			newString = UNOSTRING.substring(0, 1).concat(newString);
 		}
 
 		if (cyclomaticComplexity3(bin1, bin2, index1, index2, 0)) {
-			newLong = ZEROSTRING.substring(0, 1).concat(newLong);
+			newString = ZEROSTRING.substring(0, 1).concat(newString);
 		}
 		if (cyclomaticComplexity3(bin1, bin2, index1, index2, 1)) {
-			newLong = UNOSTRING.substring(0, 1).concat(newLong);
+			newString = UNOSTRING.substring(0, 1).concat(newString);
 		}
-		return newLong;
+		return newString;
 	}
 
 }
