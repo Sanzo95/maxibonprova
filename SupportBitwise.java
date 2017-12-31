@@ -171,10 +171,8 @@ public class SupportBitwise {
 	public static long bitwise(Long long1, Long long2, char c) {
 		String newLong = "";
 		long l = 0;
-		String bin1 = Long.toBinaryString(long1);
-		String bin2 = Long.toBinaryString(long2);
-		int l1 = bin1.length();
-		int l2 = bin2.length();
+		String bin1 = Long.toBinaryString(long1), bin2 = Long.toBinaryString(long2);
+		int l1 = bin1.length(), l2 = bin2.length();
 		if (l1 < l2) {
 			bin1 = equalsLength(bin1, bin2, l1, l2);
 			l1 = bin1.length();
