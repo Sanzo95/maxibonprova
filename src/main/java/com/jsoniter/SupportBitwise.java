@@ -1,6 +1,7 @@
 package com.jsoniter;
+
 /**
- * classe di supporto per risolvere il problema di affidabilit‡ "Avoid using
+ * classe di supporto per risolvere il problema di affidabilit√† "Avoid using
  * bitwise operators to make comparisons"
  * 
  * @author Francesco
