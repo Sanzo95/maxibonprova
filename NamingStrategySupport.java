@@ -71,16 +71,17 @@ public class NamingStrategySupport {
 	public static NamingStrategy SNAKE_CASE = new NamingStrategy() {
 		@Override
 		public String translate(String stringaSnake) {
-			if (stringaSnake == null) {
-				return stringaSnake; // garbage in, garbage out
+			String stringa = stringaSnake;
+			if (stringa == null) {
+				return stringa; // garbage in, garbage out
 			}
 
-			int size = stringaSnake.length();
+			int size = stringa.length();
 			StringBuilder resultBuilder = new StringBuilder(size * 2);
 			int sizeResult = 0;
 			boolean wasPrevTranslated = false;
 			for (int i = 0; i < size; i++) {
-				char carattere = stringaSnake.charAt(i);
+				char carattere = stringa.charAt(i);
 				if (i > 0 || carattere != '_') // skip first starting underscore
 				{
 					if (Character.isUpperCase(carattere)) {
@@ -97,7 +98,7 @@ public class NamingStrategySupport {
 					sizeResult++;
 				}
 			}
-			return sizeResult > 0 ? resultBuilder.toString() : stringaSnake;
+			return sizeResult > 0 ? resultBuilder.toString() : stringa;
 		}
 	};
 	/**
