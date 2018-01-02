@@ -70,34 +70,34 @@ public class NamingStrategySupport {
 
 	public static NamingStrategy SNAKE_CASE = new NamingStrategy() {
 		@Override
-		public String translate(String stringa) {
-			if (stringa == null) {
-				return stringa; // garbage in, garbage out
+		public String translate(String stringaSnake) {
+			if (stringaSnake == null) {
+				return stringaSnake; // garbage in, garbage out
 			}
 
-			int length = stringa.length();
-			StringBuilder result = new StringBuilder(length * 2);
-			int resultLength = 0;
+			int size = stringaSnake.length();
+			StringBuilder resultBuilder = new StringBuilder(size * 2);
+			int sizeResult = 0;
 			boolean wasPrevTranslated = false;
-			for (int i = 0; i < length; i++) {
-				char c = stringa.charAt(i);
-				if (i > 0 || c != '_') // skip first starting underscore
+			for (int i = 0; i < size; i++) {
+				char carattere = stringaSnake.charAt(i);
+				if (i > 0 || carattere != '_') // skip first starting underscore
 				{
-					if (Character.isUpperCase(c)) {
-						if (!wasPrevTranslated && resultLength > 0 && result.charAt(resultLength - 1) != '_') {
-							result.append('_');
-							resultLength++;
+					if (Character.isUpperCase(carattere)) {
+						if (!wasPrevTranslated && sizeResult > 0 && resultBuilder.charAt(sizeResult - 1) != '_') {
+							resultBuilder.append('_');
+							sizeResult++;
 						}
-						c = Character.toLowerCase(c);
+						carattere = Character.toLowerCase(carattere);
 						wasPrevTranslated = true;
 					} else {
 						wasPrevTranslated = false;
 					}
-					result.append(c);
-					resultLength++;
+					resultBuilder.append(carattere);
+					sizeResult++;
 				}
 			}
-			return resultLength > 0 ? result.toString() : stringa;
+			return sizeResult > 0 ? resultBuilder.toString() : stringaSnake;
 		}
 	};
 	/**
