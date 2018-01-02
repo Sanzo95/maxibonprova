@@ -27,7 +27,7 @@ public class NamingStrategySupport {
 		 *
 		 */
 		
-		String translate(String input);
+		String translate(String stringa);
 	}
 
 	/**
