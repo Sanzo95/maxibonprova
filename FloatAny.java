@@ -35,17 +35,19 @@ class FloatAny extends Any {
 
 	@Override
 	public boolean toBoolean() {
-		return val != 0;
+		return val != 0.0;
 	}
 
 	@Override
 	public int toInt() {
-		return (int) val;
+		Float intero=val;
+		return intero.intValue();
 	}
 
 	@Override
 	public long toLong() {
-		return (long) val;
+		Float l=val;
+		return l.longValue();
 	}
 
 	@Override

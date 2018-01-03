@@ -42,28 +42,39 @@ class StringLazyAny extends LazyAny {
 	@Override
 	public boolean toBoolean() {
 		fillCache();
+		boolean flag = true;
 		int len = cache.length();
 		if (len == 0) {
-			return false;
+			flag = false;
 		}
 		if (len == 5 && FALSE.equals(cache)) {
-			return false;
+			flag = false;
 		}
 		for (int i = 0; i < len; i++) {
-			switch (cache.charAt(i)) {
-			case ' ':
-				continue;
-			case '\t':
-				continue;
-			case '\n':
-				continue;
-			case '\r':
-				continue;
-			default:
-				return true;
+			if (flag) {
+				switch (cache.charAt(i)) {
+				case ' ':
+					flag = true;
+					break;
+				case '\t':
+					flag = true;
+					break;
+				case '\n':
+					flag = true;
+					break;
+				case '\r':
+					flag = true;
+					break;
+				default:
+					flag = true;
+					break;
+				}
+			} else {
+				break;
 			}
+
 		}
-		return false;
+		return flag;
 	}
 
 	@Override
@@ -73,8 +84,8 @@ class StringLazyAny extends LazyAny {
 			CodegenAccess.nextToken(iter);
 			return iter.readInt();
 		} catch (IOException e) {
-			String err = "Error: IOException";
-			throw new JsonException(err);
+			System.err.println("Error: IOException");
+			throw new JsonException();
 		} finally {
 			JsonIteratorPool.returnJsonIterator(iter);
 		}

@@ -42,17 +42,20 @@ class DoubleAny extends Any {
 
 	@Override
 	public int toInt() {
-		return (int) val;
+		Double d = val;
+		return d.intValue();
 	}
 
 	@Override
 	public long toLong() {
-		return (long) val;
+		Double d = val;
+		return d.longValue();
 	}
 
 	@Override
 	public float toFloat() {
-		return (float) val;
+		Double d = val;
+		return d.floatValue();
 	}
 
 	@Override

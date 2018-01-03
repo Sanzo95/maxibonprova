@@ -133,11 +133,13 @@ class CodegenImplObjectHash {
 
 	public static int calcHash(String fromName) {
 		long hash = 0x811c9dc5;
+		Long l;
 		for (byte b : fromName.getBytes()) {
 			hash ^= b;
 			hash *= 0x1000193;
 		}
-		return (int) hash;
+		l= hash;
+		return l.intValue();
 	}
 
 	private static Object appendBindingSet(StringBuilder lines, ClassDescriptor desc, Binding binding) {

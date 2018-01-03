@@ -120,12 +120,12 @@ class ObjectAny extends Any {
 	}
 
 	/**
-	 * Public Class IteratorAdapter
+	 * Class IteratorAdapter
 	 * 
 	 * @author MaxiBon
 	 *
 	 */
-	public static class IteratorAdapter implements EntryIterator {
+	protected static class IteratorAdapter implements EntryIterator {
 
 		private final Iterator<Map.Entry<String, Any>> iter;
 		private Map.Entry<String, Any> entry;

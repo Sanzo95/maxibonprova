@@ -40,7 +40,8 @@ class LongAny extends Any {
 
 	@Override
 	public int toInt() {
-		return (int) val;
+		Long intero = val;
+		return intero.intValue();
 	}
 
 	@Override

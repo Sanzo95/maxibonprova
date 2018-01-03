@@ -129,7 +129,7 @@ class CodegenImplEnum {
 				if (entry.getValue() instanceof Map<?, ?>) {
 					next = (Map<Byte, Object>) entry.getValue();
 				}
-				if (next.size() == 1) {
+				if (!next.equals(null) && next.size() == 1) {
 					nextBytesToCompare = new ArrayList<Byte>(bytesToCompare);
 					nextBytesToCompare.add(b);
 					addFieldDispatch(lines, len, i + 1, next, nextBytesToCompare);

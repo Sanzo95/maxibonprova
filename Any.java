@@ -85,7 +85,7 @@ public abstract class Any implements Iterable<Any> {
 			@Override
 			public void encode(Object obj, JsonStream stream) throws IOException {
 				Any any = null;
-				if (obj instanceof Any) {
+				if (!obj.equals(null) && obj instanceof Any) {
 					any = (Any) obj;
 				}
 				any.writeTo(stream);
@@ -159,7 +159,13 @@ public abstract class Any implements Iterable<Any> {
 	public abstract ValueType valueType();
 
 	public <T> T bindTo(T obj, Object... keys_) {
-		return get(keys_).bindTo(obj);
+		T object;
+		if(get(keys_).equals(null)) {
+			object = null;
+		}else {
+			object = get(keys_).bindTo(obj);
+		}
+		return object;
 	}
 
 	public <T> T bindTo(T obj) {
@@ -171,7 +177,13 @@ public abstract class Any implements Iterable<Any> {
 	}
 
 	public <T> T bindTo(TypeLiteral<T> typeLiteral, T obj, Object... keys_) {
-		return get(keys_).bindTo(typeLiteral, obj);
+		T object;
+		if(get(keys_).equals(null)) {
+			object = null;
+		}else {
+			object = get(keys_).bindTo(typeLiteral, obj);
+		}
+		return object;
 	}
 
 	public <T> T bindTo(TypeLiteral<T> typeLiteral, T obj) {
@@ -183,7 +195,13 @@ public abstract class Any implements Iterable<Any> {
 	}
 
 	public Object object(Object... keys_) {
-		return get(keys_).object();
+		Object obj;
+		if(get(keys_).object().equals(null)) {
+			obj = null;
+		}else {
+			obj = get(keys_).object();
+		}
+		return obj;
 	}
 
 	public abstract Object object();
@@ -207,7 +225,13 @@ public abstract class Any implements Iterable<Any> {
 	}
 
 	public <T> T as(Class<T> clazz, Object... keys_) {
-		return get(keys_).as(clazz);
+		T object;
+		if(get(keys_).equals(null)) {
+			object=null;
+		}else {
+			object = get(keys_).as(clazz);
+		}
+		return object;
 	}
 
 	public <T> T as(Class<T> clazz) {
@@ -219,7 +243,13 @@ public abstract class Any implements Iterable<Any> {
 	}
 
 	public <T> T as(TypeLiteral<T> typeLiteral, Object... keys_) {
-		return get(keys_).as(typeLiteral);
+		T object;
+		if(get(keys_).equals(null)) {
+			object=null;
+		}else {
+			object = get(keys_).as(typeLiteral);
+		}
+		return object;
 	}
 
 	public <T> T as(TypeLiteral<T> typeLiteral) {
@@ -231,37 +261,73 @@ public abstract class Any implements Iterable<Any> {
 	}
 
 	public final boolean toBoolean(Object... keys_) {
-		return get(keys_).toBoolean();
+		Boolean b;
+		if(get(keys_).equals(null)) {
+			b=null;
+		}else {
+			b=get(keys_).toBoolean();
+		}
+		return b.booleanValue();
 	}
 
 	public abstract boolean toBoolean();
 
 	public final int toInt(Object... keys_) {
-		return get(keys_).toInt();
+		Integer i;
+		if(get(keys_).equals(null)) {
+			i=null;
+		}else {
+			i=get(keys_).toInt();
+		}
+		return i.intValue();
 	}
 
 	public abstract int toInt();
 
 	public final long toLong(Object... keys_) {
-		return get(keys_).toLong();
+		Long l;
+		if(get(keys_).equals(null)) {
+			l=null;
+		}else {
+			l=get(keys_).toLong();
+		}
+		return l.longValue();
 	}
 
 	public abstract long toLong();
 
 	public final float toFloat(Object... keys_) {
-		return get(keys_).toFloat();
+		Float f;
+		if(get(keys_).equals(null)) {
+			f=null;
+		}else {
+			f=get(keys_).toFloat();
+		}
+		return f.floatValue();
 	}
 
 	public abstract float toFloat();
 
 	public final double toDouble(Object... keys_) {
-		return get(keys_).toDouble();
+		Double d;
+		if(get(keys_).equals(null)) {
+			d=null;
+		}else {
+			d=get(keys_).toDouble();
+		}
+		return d.doubleValue();
 	}
 
 	public abstract double toDouble();
 
 	public final String toString(Object... keys_) {
-		return get(keys_).toString();
+		String s;
+		if(get(keys_).equals(null)) {
+			s=null;
+		}else {
+			s=get(keys_).toString();
+		}
+		return s;
 	}
 
 	public abstract String toString();
@@ -381,28 +447,28 @@ public abstract class Any implements Iterable<Any> {
 	}
 
 	public static Any wrap(String val) {
-		if (val == null) {
+		if (val.equals(null)) {
 			return NullAny.INSTANCE;
 		}
 		return new StringAny(val);
 	}
 
 	public static <T> Any wrap(Collection<T> val) {
-		if (val == null) {
+		if (val.contains(null)) {
 			return NullAny.INSTANCE;
 		}
 		return new ListWrapperAny(new ArrayList(val));
 	}
 
 	public static <T> Any wrap(List<T> val) {
-		if (val == null) {
+		if (val.contains(null)) {
 			return NullAny.INSTANCE;
 		}
 		return new ListWrapperAny(val);
 	}
 
 	public static <T> Any wrap(Map<String, T> val) {
-		if (val == null) {
+		if (val.containsKey(null)) {
 			return NullAny.INSTANCE;
 		}
 		return new MapWrapperAny(val);

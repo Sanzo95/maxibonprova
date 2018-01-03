@@ -46,28 +46,38 @@ class StringAny extends Any {
 
 	@Override
 	public boolean toBoolean() {
+		boolean flag = true;
 		int len = val.length();
 		if (len == 0) {
-			return false;
+			flag = false;
 		}
 		if (len == 5 && FALSE.equals(val)) {
-			return false;
+			flag = false;
 		}
 		for (int i = 0; i < len; i++) {
-			switch (val.charAt(i)) {
-			case ' ':
-				continue;
-			case '\t':
-				continue;
-			case '\n':
-				continue;
-			case '\r':
-				continue;
-			default:
-				return true;
+			if (flag) {
+				switch (val.charAt(i)) {
+				case ' ':
+					flag = true;
+					break;
+				case '\t':
+					flag = true;
+					break;
+				case '\n':
+					flag = true;
+					break;
+				case '\r':
+					flag = true;
+					break;
+				default:
+					flag = true;
+					break;
+				}
+			} else {
+				break;
 			}
 		}
-		return false;
+		return flag;
 	}
 
 	@Override
