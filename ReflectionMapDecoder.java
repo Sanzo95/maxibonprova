@@ -19,15 +19,15 @@ import com.jsoniter.spi.TypeLiteral;
  */
 class ReflectionMapDecoder implements Decoder {
 	/**
-	 * 
+	 * private final Constructor ctor;
 	 */
 	private final Constructor ctor;
 	/**
-	 * 
+	 * private final Decoder valueTypeDecoder;
 	 */
 	private final Decoder valueTypeDecoder;
 	/**
-	 * 
+	 * private final MapKeyDecoder mapKeyDecoder;
 	 */
 	private final MapKeyDecoder mapKeyDecoder;
 
@@ -54,7 +54,7 @@ class ReflectionMapDecoder implements Decoder {
 	}
 
 	/**
-	 * 
+	 * throws IOException
 	 */
 	public Object decode(JsonIterator iter) throws IOException {
 		try {
@@ -73,6 +73,7 @@ class ReflectionMapDecoder implements Decoder {
 	 * @throws Exception
 	 */
 	private Object decode_(JsonIterator iter) throws Exception {
+		Object decodedMapKey = null;
 		if (CodegenAccess.resetExistingObject(iter) instanceof Map) {
 			Map map = (Map) CodegenAccess.resetExistingObject(iter);
 			if (iter.readNull()) {
@@ -84,15 +85,17 @@ class ReflectionMapDecoder implements Decoder {
 			if (!CodegenAccess.readObjectStart(iter)) {
 				return map;
 			}
-			byte b = 0;
-			do {
-				Object decodedMapKey = readMapKey(iter);
+			decodedMapKey = readMapKey(iter);
+			map.put(decodedMapKey, valueTypeDecoder.decode(iter));
+			byte b = CodegenAccess.nextToken(iter);
+			while (b == ',') {
+				decodedMapKey = readMapKey(iter);
 				map.put(decodedMapKey, valueTypeDecoder.decode(iter));
 				b = CodegenAccess.nextToken(iter);
-			} while (b == ',');
+			}
 			return map;
-		} else
-			return null;
+		}
+		return decodedMapKey;
 	}
 
 	/**
