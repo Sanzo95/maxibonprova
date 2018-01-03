@@ -60,13 +60,15 @@ class ReflectionCollectionDecoder implements Decoder {
 	 * @throws Exception
 	 */
 	private Object decode_(JsonIterator iter) throws Exception {
-		if (CodegenAccess.resetExistingObject(iter) instanceof Collection) {
-			Collection col = (Collection) CodegenAccess.resetExistingObject(iter);
+		Object obj = CodegenAccess.resetExistingObject(iter);
+		if (obj instanceof Collection) {
+			Collection col = (Collection) obj;
 			if (iter.readNull()) {
 				return null;
 			}
-			if (col == null && (this.ctor.newInstance() instanceof Collection)) {
-				col = (Collection) this.ctor.newInstance();
+			obj = this.ctor.newInstance();
+			if (col == null && (obj instanceof Collection)) {
+				col = (Collection) obj;
 			} else {
 				col.clear();
 			}
@@ -76,7 +78,8 @@ class ReflectionCollectionDecoder implements Decoder {
 				flag = iter.readArray();
 			}
 			return col;
-		} else
-			return null;
+		}
+		obj = null;
+		return obj;
 	}
 }

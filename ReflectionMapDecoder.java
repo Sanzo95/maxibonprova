@@ -88,10 +88,12 @@ class ReflectionMapDecoder implements Decoder {
 			decodedMapKey = readMapKey(iter);
 			map.put(decodedMapKey, valueTypeDecoder.decode(iter));
 			byte b = CodegenAccess.nextToken(iter);
-			while (b == ',') {
+			int intero = b;
+			while (intero == ',') {
 				decodedMapKey = readMapKey(iter);
 				map.put(decodedMapKey, valueTypeDecoder.decode(iter));
 				b = CodegenAccess.nextToken(iter);
+				intero = b;
 			}
 			return map;
 		}

@@ -62,9 +62,8 @@ class DynamicCodegen {
 		Object o = ctClass.toClass().newInstance();
 		if (o instanceof Decoder) {
 			decoder = (Decoder) o;
-			return decoder;
-		} else
-			return null;
+		}
+		return decoder;
 	}
 
 	/**
