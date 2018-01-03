@@ -24,6 +24,9 @@ import com.jsoniter.spi.TypeLiteral;
  *
  */
 public abstract class Any implements Iterable<Any> {
+	
+	private final static Character wildcard = '*';
+	private final static int wildcardHashCode = Character.valueOf(wildcard).hashCode();
 
 	static {
 		com.jsoniter.spi.Encoder.ReflectionEncoder anyEncoder = new com.jsoniter.spi.Encoder.ReflectionEncoder() {
@@ -407,9 +410,6 @@ public abstract class Any implements Iterable<Any> {
 	public static Any rewrap(Map<String, Any> val) {
 		return new ObjectAny(val);
 	}
-
-	private final static int wildcardHashCode = Character.valueOf('*').hashCode();
-	private final static Character wildcard = '*';
 
 	protected boolean isWildcard(Object keyElement) {
 		return wildcardHashCode == keyElement.hashCode() && wildcard.equals(keyElement);

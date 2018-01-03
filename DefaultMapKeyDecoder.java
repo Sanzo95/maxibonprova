@@ -1,9 +1,13 @@
 package com.jsoniter;
 
-import com.jsoniter.spi.*;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
+
+import com.jsoniter.spi.JsonException;
+import com.jsoniter.spi.JsoniterSpi;
+import com.jsoniter.spi.MapKeyDecoder;
+import com.jsoniter.spi.Slice;
+import com.jsoniter.spi.TypeLiteral;
 
 /**
  * class DefaultMapKeyDecoder
@@ -12,6 +16,9 @@ import java.lang.reflect.Type;
  *
  */
 class DefaultMapKeyDecoder implements MapKeyDecoder {
+
+	private final TypeLiteral mapKeyTypeLiteral;
+
 	/**
 	 * registerOrGetExisting.
 	 * 
@@ -28,8 +35,6 @@ class DefaultMapKeyDecoder implements MapKeyDecoder {
 		JsoniterSpi.addNewMapDecoder(cacheKey, mapKeyDecoder);
 		return mapKeyDecoder;
 	}
-
-	private final TypeLiteral mapKeyTypeLiteral;
 
 	private DefaultMapKeyDecoder(TypeLiteral mapKeyTypeLiteral) {
 		this.mapKeyTypeLiteral = mapKeyTypeLiteral;
