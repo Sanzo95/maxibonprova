@@ -48,6 +48,33 @@ public abstract class Any implements Iterable<Any> {
 		}
 	};
 
+	/**
+	 * protected final static EntryIterator EMPTY_ENTRIES_ITERATOR = new
+	 * EntryIterator()
+	 */
+	protected final static EntryIterator EMPTY_ENTRIES_ITERATOR = new EntryIterator() {
+		/**
+		 * 
+		 */
+		public boolean next() {
+			return false;
+		}
+
+		/**
+		 * 
+		 */
+		public String key() {
+			throw new NoSuchElementException();
+		}
+
+		/**
+		 * 
+		 */
+		public Any value() {
+			throw new NoSuchElementException();
+		}
+	};
+
 	static {
 		com.jsoniter.spi.Encoder.ReflectionEncoder anyEncoder = new com.jsoniter.spi.Encoder.ReflectionEncoder() {
 			@Override
@@ -124,32 +151,6 @@ public abstract class Any implements Iterable<Any> {
 	 * final static Set<String> EMPTY_KEYS
 	 */
 	protected final static Set<String> EMPTY_KEYS = Collections.unmodifiableSet(new HashSet<String>());
-	/**
-	 * protected final static EntryIterator EMPTY_ENTRIES_ITERATOR = new
-	 * EntryIterator()
-	 */
-	protected final static EntryIterator EMPTY_ENTRIES_ITERATOR = new EntryIterator() {
-		/**
-		 * 
-		 */
-		public boolean next() {
-			return false;
-		}
-
-		/**
-		 * 
-		 */
-		public String key() {
-			throw new NoSuchElementException();
-		}
-
-		/**
-		 * 
-		 */
-		public Any value() {
-			throw new NoSuchElementException();
-		}
-	};
 
 	/**
 	 * 

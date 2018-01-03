@@ -1,8 +1,17 @@
 package com.jsoniter;
 
-import com.jsoniter.spi.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import java.util.*;
+import com.jsoniter.spi.Binding;
+import com.jsoniter.spi.ClassDescriptor;
+import com.jsoniter.spi.ConstructorDescriptor;
+import com.jsoniter.spi.WrapperDescriptor;
 
 /**
  * class CodegenImplObjectHash
@@ -15,7 +24,7 @@ class CodegenImplObjectHash {
 	private CodegenImplObjectHash() {
 	}
 
-	private static int SBSIZE = 128;
+	private final static int SBSIZE = 128;
 
 	/**
 	 * genObjectUsingHash. the implementation is from dsljson, it is the fastest
@@ -72,14 +81,14 @@ class CodegenImplObjectHash {
 			}
 		}
 		// === bind fields
-		HashSet<Integer> knownHashes = new HashSet<Integer>();
+		Set<Integer> knownHashes = new HashSet<Integer>();
 		HashMap<String, Binding> bindings = new HashMap<String, Binding>();
 		for (Binding binding : desc.allDecoderBindings()) {
 			for (String fromName : binding.fromNames) {
 				bindings.put(fromName, binding);
 			}
 		}
-		ArrayList<String> fromNames = new ArrayList<String>(bindings.keySet());
+		List<String> fromNames = new ArrayList<String>(bindings.keySet());
 		Collections.sort(fromNames, new Comparator<String>() {
 			@Override
 			public int compare(String o1, String o2) {

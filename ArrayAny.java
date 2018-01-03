@@ -17,7 +17,7 @@ class ArrayAny extends Any {
 	 * 
 	 * @param val
 	 */
-	public ArrayAny(List<Any> val) {
+	ArrayAny(List<Any> val) {
 		this.val = val;
 	}
 
@@ -73,7 +73,7 @@ class ArrayAny extends Any {
 		}
 		Object key = keys[idx];
 		if (isWildcard(key)) {
-			ArrayList<Any> result = new ArrayList<Any>();
+			List<Any> result = new ArrayList<Any>();
 			for (Any element : val) {
 				Any mapped = element.get(keys, idx + 1);
 				if (mapped.valueType() != ValueType.INVALID) {

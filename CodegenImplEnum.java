@@ -1,8 +1,13 @@
 package com.jsoniter;
 
-import com.jsoniter.spi.ClassInfo;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import java.util.*;
+import com.jsoniter.spi.ClassInfo;
 
 /**
  * class CodegenImplEnum
@@ -15,7 +20,7 @@ class CodegenImplEnum {
 	private CodegenImplEnum() {
 	}
 
-	private static int SBSIZE = 128;
+	private final static int SBSIZE = 128;
 
 	/**
 	 * genEnum.
@@ -102,7 +107,7 @@ class CodegenImplEnum {
 			List<Byte> bytesToCompare) {
 		try {
 			Set<Map.Entry<Byte, Object>> setSize = current.entrySet();
-			ArrayList<Byte> nextBytesToCompare = null;
+			List<Byte> nextBytesToCompare = null;
 			for (Map.Entry<Byte, Object> entry : setSize) {
 				Byte b = entry.getKey();
 				if (i == len - 1) {
