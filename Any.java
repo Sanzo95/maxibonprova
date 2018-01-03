@@ -24,9 +24,29 @@ import com.jsoniter.spi.TypeLiteral;
  *
  */
 public abstract class Any implements Iterable<Any> {
-	
+
 	private final static Character wildcard = '*';
 	private final static int wildcardHashCode = Character.valueOf(wildcard).hashCode();
+
+	/**
+	 * 
+	 */
+	protected final static Iterator<Any> EMPTY_ITERATOR = new Iterator<Any>() {
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return false;
+		}
+
+		@Override
+		public Any next() {
+			throw new NoSuchElementException();
+		}
+	};
 
 	static {
 		com.jsoniter.spi.Encoder.ReflectionEncoder anyEncoder = new com.jsoniter.spi.Encoder.ReflectionEncoder() {
@@ -105,44 +125,36 @@ public abstract class Any implements Iterable<Any> {
 	 */
 	protected final static Set<String> EMPTY_KEYS = Collections.unmodifiableSet(new HashSet<String>());
 	/**
-	 * 
+	 * protected final static EntryIterator EMPTY_ENTRIES_ITERATOR = new
+	 * EntryIterator()
 	 */
 	protected final static EntryIterator EMPTY_ENTRIES_ITERATOR = new EntryIterator() {
-		@Override
+		/**
+		 * 
+		 */
 		public boolean next() {
 			return false;
 		}
 
-		@Override
+		/**
+		 * 
+		 */
 		public String key() {
 			throw new NoSuchElementException();
 		}
 
-		@Override
+		/**
+		 * 
+		 */
 		public Any value() {
 			throw new NoSuchElementException();
 		}
 	};
+
 	/**
 	 * 
+	 * @return
 	 */
-	protected final static Iterator<Any> EMPTY_ITERATOR = new Iterator<Any>() {
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean hasNext() {
-			return false;
-		}
-
-		@Override
-		public Any next() {
-			throw new NoSuchElementException();
-		}
-	};
-
 	public abstract ValueType valueType();
 
 	public <T> T bindTo(T obj, Object... keys_) {

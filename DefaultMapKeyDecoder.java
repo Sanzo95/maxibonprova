@@ -16,7 +16,9 @@ import com.jsoniter.spi.TypeLiteral;
  *
  */
 class DefaultMapKeyDecoder implements MapKeyDecoder {
-
+	/**
+	 * 
+	 */
 	private final TypeLiteral mapKeyTypeLiteral;
 
 	/**
@@ -36,11 +38,17 @@ class DefaultMapKeyDecoder implements MapKeyDecoder {
 		return mapKeyDecoder;
 	}
 
+	/**
+	 * 
+	 * @param mapKeyTypeLiteral
+	 */
 	private DefaultMapKeyDecoder(TypeLiteral mapKeyTypeLiteral) {
 		this.mapKeyTypeLiteral = mapKeyTypeLiteral;
 	}
 
-	@Override
+	/**
+	 * @return object
+	 */
 	public Object decode(Slice encodedMapKey) {
 		JsonIterator iter = JsonIteratorPool.borrowJsonIterator();
 		iter.reset(encodedMapKey);
