@@ -35,10 +35,14 @@ class DynamicCodegen {
 	 * @throws IllegalAccessException
 	 */
 	public static Decoder gen(String cacheKey, String source)
-			throws CannotCompileException, NotFoundException, InstantiationException, IllegalAccessException {
+			throws CannotCompileException, InstantiationException, IllegalAccessException {
 		Decoder decoder = null;
 		CtClass ctClass = pool.makeClass(cacheKey);
-		ctClass.setInterfaces(new CtClass[] { pool.get(Decoder.class.getName()) });
+		try {
+			ctClass.setInterfaces(new CtClass[] { pool.get(Decoder.class.getName()) });
+		} catch (NotFoundException e) {
+			System.err.println("getNameClassDecoder NotFoundException");
+		}
 		CtMethod staticMethod = CtNewMethod.make(source, ctClass);
 		ctClass.addMethod(staticMethod);
 		CtMethod interfaceMethod = CtNewMethod.make(

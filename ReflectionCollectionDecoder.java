@@ -46,22 +46,35 @@ class ReflectionCollectionDecoder implements Decoder {
 		}
 	}
 
-	private Object decode_(JsonIterator iter) throws InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException, IOException {
+	private Object decode_(JsonIterator iter) throws InstantiationException, IllegalAccessException, IllegalArgumentException  {
 		if (CodegenAccess.resetExistingObject(iter) instanceof Collection) {
 			Collection col = (Collection) CodegenAccess.resetExistingObject(iter);
-			if (iter.readNull()) {
-				return null;
+			try {
+				if (iter.readNull()) {
+					return null;
+				}
+			} catch (IOException e) {
+				System.err.println("readNull() return IOWxception");
 			}
-			if (col == null && (this.ctor.newInstance() instanceof Collection)) {
-				col = (Collection) this.ctor.newInstance();
-			} else {
-				col.clear();
+			try {
+				if (col == null && (this.ctor.newInstance() instanceof Collection)) {
+					col = (Collection) this.ctor.newInstance();
+				} else {
+					col.clear();
+				}
+			} catch (InvocationTargetException e1) {
+				System.err.println("ctor.newInstance() return InvocationTargetException");
 			}
-			boolean flag = iter.readArray();
+			boolean flag;
+			try {
+				flag = iter.readArray();
+			
 			while (flag) {
 				col.add(compTypeDecoder.decode(iter));
 				flag = iter.readArray();
+				}
+			} catch (IOException e) {
+				System.err.println("readNull() return IOWxception");
 			}
 			return col;
 		} else

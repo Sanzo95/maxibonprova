@@ -53,15 +53,20 @@ class ReflectionMapDecoder implements Decoder {
 		}
 	}
 
-	private Object decode_(JsonIterator iter) throws IOException, InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException {
+	private Object decode_(JsonIterator iter) throws IOException, InstantiationException, IllegalAccessException {
 		if (CodegenAccess.resetExistingObject(iter) instanceof Map) {
 			Map map = (Map) CodegenAccess.resetExistingObject(iter);
 			if (iter.readNull()) {
 				return null;
 			}
-			if (map == null && (ctor.newInstance() instanceof Map)) {
-				map = (Map) ctor.newInstance();
+			try {
+				if (map == null && (ctor.newInstance() instanceof Map)) {
+					map = (Map) ctor.newInstance();
+				}
+			} catch (IllegalArgumentException e) {
+				System.err.println("ctor.newInstance() generated new IllegalArgumentException");
+			} catch (InvocationTargetException e) {
+				System.err.println("ctor.newInstance() generated new InvocationTargetException");
 			}
 			if (!CodegenAccess.readObjectStart(iter)) {
 				return map;
