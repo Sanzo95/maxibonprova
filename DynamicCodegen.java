@@ -17,19 +17,19 @@ import javassist.NotFoundException;
  *
  */
 class DynamicCodegen {
-/**
- * 
- */
+	/**
+	 * private DynamicCodegen()
+	 */
 	private DynamicCodegen() {
 	}
 
 	/**
-	 * 
+	 * ClassPool pool = ClassPool.getDefault();
 	 */
 	static ClassPool pool = ClassPool.getDefault();
-/**
- * 
- */
+	/**
+	 * pool.insertClassPath(new ClassClassPath(Decoder.class));
+	 */
 	static {
 		pool.insertClassPath(new ClassClassPath(Decoder.class));
 	}
@@ -66,11 +66,12 @@ class DynamicCodegen {
 		} else
 			return null;
 	}
-/**
- * 
- * @throws CannotCompileException
- * @throws NotFoundException
- */
+
+	/**
+	 * 
+	 * @throws CannotCompileException
+	 * @throws NotFoundException
+	 */
 	public static void enableStreamingSupport() throws CannotCompileException, NotFoundException {
 		CtClass ctClass = pool.makeClass("com.jsoniter.IterImpl");
 		ctClass.setSuperclass(pool.get(IterImplForStreaming.class.getName()));

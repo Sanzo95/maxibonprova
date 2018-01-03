@@ -17,11 +17,11 @@ import java.util.Collection;
  */
 class ReflectionCollectionDecoder implements Decoder {
 	/**
-	 * 
+	 * private final Constructor ctor;
 	 */
 	private final Constructor ctor;
 	/**
-	 * 
+	 * private final Decoder compTypeDecoder;
 	 */
 	private final Decoder compTypeDecoder;
 
@@ -41,7 +41,7 @@ class ReflectionCollectionDecoder implements Decoder {
 	}
 
 	/**
-	 * 
+	 * throws IOException
 	 */
 	public Object decode(JsonIterator iter) throws IOException {
 		try {
