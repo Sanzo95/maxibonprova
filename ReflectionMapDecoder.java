@@ -2,7 +2,6 @@ package com.jsoniter;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.Map;
 
@@ -19,9 +18,17 @@ import com.jsoniter.spi.TypeLiteral;
  *
  */
 class ReflectionMapDecoder implements Decoder {
-
+	/**
+	 * 
+	 */
 	private final Constructor ctor;
+	/**
+	 * 
+	 */
 	private final Decoder valueTypeDecoder;
+	/**
+	 * 
+	 */
 	private final MapKeyDecoder mapKeyDecoder;
 
 	/**
@@ -63,36 +70,26 @@ class ReflectionMapDecoder implements Decoder {
 	 * 
 	 * @param iter
 	 * @return
-	 * @throws IOException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
+	 * @throws Exception
 	 */
-	private Object decode_(JsonIterator iter) throws IOException, InstantiationException, IllegalAccessException {
+	private Object decode_(JsonIterator iter) throws Exception {
 		if (CodegenAccess.resetExistingObject(iter) instanceof Map) {
 			Map map = (Map) CodegenAccess.resetExistingObject(iter);
 			if (iter.readNull()) {
 				return null;
 			}
-			try {
-				if (map == null && (ctor.newInstance() instanceof Map)) {
-					map = (Map) ctor.newInstance();
-				}
-			} catch (IllegalArgumentException e) {
-				System.err.println("ctor.newInstance() generated new IllegalArgumentException");
-			} catch (InvocationTargetException e) {
-				System.err.println("ctor.newInstance() generated new InvocationTargetException");
+			if (map == null && (ctor.newInstance() instanceof Map)) {
+				map = (Map) ctor.newInstance();
 			}
 			if (!CodegenAccess.readObjectStart(iter)) {
 				return map;
 			}
-			Object decodedMapKey = readMapKey(iter);
-			map.put(decodedMapKey, valueTypeDecoder.decode(iter));
-			byte b = CodegenAccess.nextToken(iter);
-			while (b == ',') {
-				decodedMapKey = readMapKey(iter);
+			byte b = 0;
+			do {
+				Object decodedMapKey = readMapKey(iter);
 				map.put(decodedMapKey, valueTypeDecoder.decode(iter));
 				b = CodegenAccess.nextToken(iter);
-			}
+			} while (b == ',');
 			return map;
 		} else
 			return null;

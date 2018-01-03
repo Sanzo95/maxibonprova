@@ -6,7 +6,6 @@ import com.jsoniter.spi.TypeLiteral;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
@@ -17,7 +16,13 @@ import java.util.Collection;
  *
  */
 class ReflectionCollectionDecoder implements Decoder {
+	/**
+	 * 
+	 */
 	private final Constructor ctor;
+	/**
+	 * 
+	 */
 	private final Decoder compTypeDecoder;
 
 	/**
@@ -52,39 +57,23 @@ class ReflectionCollectionDecoder implements Decoder {
 	 * 
 	 * @param iter
 	 * @return
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
+	 * @throws Exception
 	 */
-	private Object decode_(JsonIterator iter)
-			throws InstantiationException, IllegalAccessException, IllegalArgumentException {
+	private Object decode_(JsonIterator iter) throws Exception {
 		if (CodegenAccess.resetExistingObject(iter) instanceof Collection) {
 			Collection col = (Collection) CodegenAccess.resetExistingObject(iter);
-			try {
-				if (iter.readNull()) {
-					return null;
-				}
-			} catch (IOException e) {
-				System.err.println("readNull() return IOWxception");
+			if (iter.readNull()) {
+				return null;
 			}
-			try {
-				if (col == null && (this.ctor.newInstance() instanceof Collection)) {
-					col = (Collection) this.ctor.newInstance();
-				} else {
-					col.clear();
-				}
-			} catch (InvocationTargetException e1) {
-				System.err.println("ctor.newInstance() return InvocationTargetException");
+			if (col == null && (this.ctor.newInstance() instanceof Collection)) {
+				col = (Collection) this.ctor.newInstance();
+			} else {
+				col.clear();
 			}
-			boolean flag = false;
-			try {
+			boolean flag = iter.readArray();
+			while (flag) {
+				col.add(compTypeDecoder.decode(iter));
 				flag = iter.readArray();
-				while (flag) {
-					col.add(compTypeDecoder.decode(iter));
-					flag = iter.readArray();
-				}
-			} catch (IOException e) {
-				System.err.println("readNull() return IOWxception");
 			}
 			return col;
 		} else
