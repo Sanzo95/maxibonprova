@@ -35,7 +35,9 @@ class ReflectionCollectionDecoder implements Decoder {
 		compTypeDecoder = Codegen.getDecoder(TypeLiteral.create(typeArgs[0]).getDecoderCacheKey(), typeArgs[0]);
 	}
 
-	@Override
+	/**
+	 * 
+	 */
 	public Object decode(JsonIterator iter) throws IOException {
 		try {
 			return decode_(iter);
@@ -46,7 +48,16 @@ class ReflectionCollectionDecoder implements Decoder {
 		}
 	}
 
-	private Object decode_(JsonIterator iter) throws InstantiationException, IllegalAccessException, IllegalArgumentException  {
+	/**
+	 * 
+	 * @param iter
+	 * @return
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 */
+	private Object decode_(JsonIterator iter)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException {
 		if (CodegenAccess.resetExistingObject(iter) instanceof Collection) {
 			Collection col = (Collection) CodegenAccess.resetExistingObject(iter);
 			try {
@@ -65,13 +76,12 @@ class ReflectionCollectionDecoder implements Decoder {
 			} catch (InvocationTargetException e1) {
 				System.err.println("ctor.newInstance() return InvocationTargetException");
 			}
-			boolean flag;
+			boolean flag = false;
 			try {
 				flag = iter.readArray();
-			
-			while (flag) {
-				col.add(compTypeDecoder.decode(iter));
-				flag = iter.readArray();
+				while (flag) {
+					col.add(compTypeDecoder.decode(iter));
+					flag = iter.readArray();
 				}
 			} catch (IOException e) {
 				System.err.println("readNull() return IOWxception");

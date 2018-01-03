@@ -1,7 +1,14 @@
 package com.jsoniter;
 
 import com.jsoniter.spi.Decoder;
-import javassist.*;
+
+import javassist.CannotCompileException;
+import javassist.ClassClassPath;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtMethod;
+import javassist.CtNewMethod;
+import javassist.NotFoundException;
 
 /**
  * class DynamicCodegen
@@ -10,7 +17,9 @@ import javassist.*;
  *
  */
 class DynamicCodegen {
-
+/**
+ * 
+ */
 	private DynamicCodegen() {
 	}
 
@@ -18,7 +27,9 @@ class DynamicCodegen {
 	 * 
 	 */
 	static ClassPool pool = ClassPool.getDefault();
-
+/**
+ * 
+ */
 	static {
 		pool.insertClassPath(new ClassClassPath(Decoder.class));
 	}
@@ -55,7 +66,11 @@ class DynamicCodegen {
 		} else
 			return null;
 	}
-
+/**
+ * 
+ * @throws CannotCompileException
+ * @throws NotFoundException
+ */
 	public static void enableStreamingSupport() throws CannotCompileException, NotFoundException {
 		CtClass ctClass = pool.makeClass("com.jsoniter.IterImpl");
 		ctClass.setSuperclass(pool.get(IterImplForStreaming.class.getName()));
