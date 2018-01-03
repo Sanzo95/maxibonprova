@@ -19,17 +19,9 @@ import com.jsoniter.spi.TypeLiteral;
  *
  */
 class ReflectionMapDecoder implements Decoder {
-	/**
-	 * 
-	 */
+
 	private final Constructor ctor;
-	/**
-	 * 
-	 */
 	private final Decoder valueTypeDecoder;
-	/**
-	 * 
-	 */
 	private final MapKeyDecoder mapKeyDecoder;
 
 	/**
