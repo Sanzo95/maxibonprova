@@ -7,7 +7,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
+/**
+ * 
+ * @author MaxiBon
+ *
+ */
 class ArrayAny extends Any {
 
 	private final List<Any> val;

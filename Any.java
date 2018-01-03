@@ -29,6 +29,11 @@ public abstract class Any implements Iterable<Any> {
 	private final static int wildcardHashCode = Character.valueOf(wildcard).hashCode();
 
 	/**
+	 * final static Set<String> EMPTY_KEYS
+	 */
+	protected final static Set<String> EMPTY_KEYS = Collections.unmodifiableSet(new HashSet<String>());
+
+	/**
 	 * 
 	 */
 	protected final static Iterator<Any> EMPTY_ITERATOR = new Iterator<Any>() {
@@ -146,11 +151,6 @@ public abstract class Any implements Iterable<Any> {
 
 		Any value();
 	}
-
-	/**
-	 * final static Set<String> EMPTY_KEYS
-	 */
-	protected final static Set<String> EMPTY_KEYS = Collections.unmodifiableSet(new HashSet<String>());
 
 	/**
 	 * 
