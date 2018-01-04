@@ -115,15 +115,15 @@ abstract class Base64 {
 	}
 
 	/**
-	 * 
+	 * static final char[] ca
 	 */
 	private static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
 	/**
-	 * 
+	 * static final byte[] BA;
 	 */
 	static final byte[] BA;
 	/**
-	 * 
+	 * static final int[] IA = new int[256];
 	 */
 	static final int[] IA = new int[256];
 	static {
