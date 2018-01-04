@@ -89,7 +89,7 @@ import java.util.Arrays;
  */
 
 abstract class Base64 {
-	
+
 	/**
 	 * 
 	 */
@@ -97,8 +97,15 @@ abstract class Base64 {
 	/**
 	 * 
 	 */
-	static Integer intero = Integer.valueOf(0);
-
+	final static int SIXTEEN = 16;
+	/**
+	 * 
+	 */
+	final static int EIGHT = 16;
+	/**
+	 * 
+	 */
+	final static int N = 0xff;
 
 	private Base64() {
 	}
@@ -128,7 +135,7 @@ abstract class Base64 {
 
 	static int encodeToChar(byte[] sArr, char[] dArr, final int start) {
 		final int sLen = sArr.length;
-		final int[] n = {0xff, 16, 8, 18, 0x3f, 12, 6};
+		final int[] n = { 0xff, 16, 8, 18, 0x3f, 12, 6 };
 		final int eLen = (sLen / 3) * 3; // Length of even 24-bits.
 		final int dLen = ((sLen - 1) / 3 + 1) << 2; // Returned character count
 
@@ -210,7 +217,7 @@ abstract class Base64 {
 
 	static int encodeToBytes(byte[] sArr, JsonStream stream) throws IOException {
 		final int sLen = sArr.length;
-		final int[] n = {0xff, 16, 8, 18, 0x3f, 12, 6, 10, 2};
+		final int[] n = { 0xff, 16, 8, 18, 0x3f, 12, 6, 10, 2 };
 		final int eLen = (sLen / 3) * 3; // Length of even 24-bits.
 		final int dLen = ((sLen - 1) / 3 + 1) << 2; // Returned character count
 
@@ -226,12 +233,18 @@ abstract class Base64 {
 					Long.getLong(Integer.toString(bitwise)).longValue(), '|'))).intValue();
 			// Encode the int into four chars
 			stream.write(
-					BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[3])),
-							Long.getLong(Integer.toString(n[4])), '&'))).intValue()],
-					BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[5])),
-							Long.getLong(Integer.toString(n[4])), '&'))).intValue()],
-					BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[6])),
-							Long.getLong(Integer.toString(n[4])), '&'))).intValue()],
+					BA[Integer
+							.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[3])),
+									Long.getLong(Integer.toString(n[4])), '&')))
+							.intValue()],
+					BA[Integer
+							.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[5])),
+									Long.getLong(Integer.toString(n[4])), '&')))
+							.intValue()],
+					BA[Integer
+							.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[6])),
+									Long.getLong(Integer.toString(n[4])), '&')))
+							.intValue()],
 					BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i)),
 							Long.getLong(Integer.toString(n[4])), '&'))).intValue()]);
 		}
@@ -336,7 +349,7 @@ abstract class Base64 {
 	}
 
 	static long decodeLongBits(JsonIterator iter) throws IOException {
-		int[] n = {46, 6, 12, 24, 18};
+		int[] n = { 46, 6, 12, 24, 18 };
 		Slice slice = iter.readStringAsSlice();
 		if (slice.len() != 11) {
 			throw iter.reportError("decodeLongBits", "must be 11 bytes for long bits encoded double");
@@ -367,12 +380,121 @@ abstract class Base64 {
 					.intValue()] < 0) {
 				return i;
 			}
-				
+
 		}
 		return sArr.length;
 	}
 
-	
+	// Follow the limit for number of statements in a method
+	/**
+	 * 
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	private static byte[] limitStatements(final int start, final int end) {
+		int sLen = end - start;
+		byte[] byteArr = null;
+		if (sLen == 0) {
+			byteArr = EMPTY_ARRAY;
+		}
+		return byteArr;
+	}
+
+	/**
+	 * 
+	 * @param sArr
+	 * @param sIx
+	 * @return
+	 */
+	private static int limitStatements2(final byte[] sArr, int sIx) {
+		int n0 = 18;
+		int n1 = 12;
+		int n2 = 6;
+		int index = sIx;
+		return Integer.getInteger(Long.toString(SupportBitwise.bitwise(
+				SupportBitwise.bitwise(
+						SupportBitwise.bitwise(Long.getLong(Integer.toString(IA[sArr[index++]] << n0)).longValue(),
+								Long.getLong(Integer.toString(IA[sArr[index++]] << n1)).longValue(), '|'),
+						Long.getLong(Integer.toString(IA[sArr[index++]] << n2)).longValue(), '|'),
+				Long.getLong(Integer.toString(IA[sArr[index++]])).longValue(), '|'))).intValue();
+	}
+
+	/**
+	 * 
+	 * @param int1
+	 * @param int2
+	 * @return
+	 */
+	private static Integer limitStatements3_bitwise(int int1, int int2) {
+		int intReturn = int1 >> int2;
+		return intReturn;
+	}
+
+	/**
+	 * 
+	 * @param int1
+	 * @param int2
+	 * @param int3
+	 * @return
+	 */
+	private static int limitStatements4_while(int int1, int int2, int int3) {
+		int toReturn = int2;
+		while (int2 < int3 && int1 < 0) {
+			toReturn++;
+		}
+		return toReturn;
+	}
+
+	/**
+	 * 
+	 * @param int1
+	 * @param int2
+	 * @param int3
+	 * @param sArr
+	 * @return
+	 */
+	private static int limitStatements5_for(int int1, int int2, int int3, final byte[] sArr) {
+		int toReturn = 0;
+		int size = int2 - int3;
+		int support = int1;
+		for (int j = 0; int1 <= size; j++) {
+			toReturn |= IA[sArr[support++]] << (18 - j * 6);
+		}
+		return toReturn;
+	}
+/**
+ * 
+ * @param int1
+ * @param int2
+ * @param int3
+ * @param dArr
+ * @return
+ */
+	private static byte[] limitStatements6_for2(int int1, int int2, int int3, final byte[] dArr) {
+		byte[] toReturn = dArr;
+		int index = int1;
+		for (int r = 16; int1 < int2; r -= 8) {
+			toReturn[index++] = limitStatements3_bitwise(int3, r).toString().getBytes().clone()[0];
+		}
+		return toReturn;
+	}
+	/**
+	 * 
+	 * @param byteArr
+	 * @param dArr
+	 * @return
+	 */
+	private static byte[] limitStatements7(final byte [] byteArr,final byte [] dArr){
+		byte [] toReturn;
+		if (byteArr.equals(null)) {
+			toReturn = null;
+		}else {
+			toReturn = dArr;
+		}
+		return toReturn;
+	}
+
 	/**
 	 * 
 	 * @param sArr
@@ -382,37 +504,21 @@ abstract class Base64 {
 	 */
 	static byte[] decodeFast(final byte[] sArr, final int start, final int end) {
 		// Check special case
-		int n = 0xff;
-		int sLen = end - start;
-		if (sLen == 0) {
-			return EMPTY_ARRAY;
-		}
-			
+		byte[] byteArr = limitStatements(start, end);
 		// Start and end index after trimming.
-		int sIx = start; 
+		int sIx = start;
 		int eIx = end - 1;
 		// Trim illegal chars from start
-		int noMethodInWhile = IA[Integer
-				.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[sIx])).longValue(),
-						Long.getLong(Integer.toString(n)).longValue(), '&')))
-				.intValue()];
-		while (sIx < eIx && noMethodInWhile < 0) {
-			sIx++;
-		}
-
+		int noMethodInWhile = IA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[sIx])).longValue(),Long.getLong(Integer.toString(N)).longValue(), '&'))).intValue()];
+		sIx = limitStatements4_while(noMethodInWhile, sIx, eIx);
 		// Trim illegal chars from end
-		noMethodInWhile = IA[Integer
-				.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[eIx])).longValue(),
-						Long.getLong(Integer.toString(n)).longValue(), '&')))
-				.intValue()];
-		while (eIx > 0 && noMethodInWhile < 0) {
-			eIx--;
-		}
+		noMethodInWhile = IA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[eIx])).longValue(),Long.getLong(Integer.toString(N)).longValue(), '&'))).intValue()];
+		eIx = limitStatements4_while(noMethodInWhile, eIx, 0);
 
 		// get the padding count (=) (0, 1 or 2)
 		int pad = sArr[eIx] == '=' ? (sArr[eIx - 1] == '=' ? 2 : 1) : 0; // Count '=' at end.
 		int cCnt = eIx - sIx + 1; // Content count including possible separators
-		int sepCnt = sLen > 76 ? (sArr[76] == '\r' ? cCnt / 78 : 0) << 1 : 0;
+		int sepCnt = (end - start) > 76 ? (sArr[76] == '\r' ? cCnt / 78 : 0) << 1 : 0;
 
 		int len = ((cCnt - sepCnt) * 6 >> 3) - pad; // The number of decoded bytes
 		byte[] dArr = new byte[len]; // Preallocate byte[] of exact length
@@ -422,22 +528,10 @@ abstract class Base64 {
 		int eLen = (len / 3) * 3;
 		for (int cc = 0; d < eLen;) {
 			// Assemble three bytes into an int from four "valid" characters.
-			int n0 = 18;
-			int n1 = 12;
-			int n2 = 6;
-			int i = Integer.getInteger(Long.toString(SupportBitwise.bitwise(
-					SupportBitwise.bitwise(
-							SupportBitwise.bitwise(Long.getLong(Integer.toString(IA[sArr[sIx++]] << n0)).longValue(),
-									Long.getLong(Integer.toString(IA[sArr[sIx++]] << n1)).longValue(), '|'),
-							Long.getLong(Integer.toString(IA[sArr[sIx++]] << n2)).longValue(), '|'),
-					Long.getLong(Integer.toString(IA[sArr[sIx++]])).longValue(), '|'))).intValue();
-
 			// Add the bytes
-			intero = i >> 16;
-			dArr[d++] = intero.toString().getBytes().clone()[0];
-			intero = i >> 8;
-			dArr[d++] = intero.toString().getBytes().clone()[0];
-			dArr[d++] = (byte) i;
+			dArr[d++] = limitStatements3_bitwise(limitStatements2(sArr, sIx), SIXTEEN).toString().getBytes().clone()[0];
+			dArr[d++] = limitStatements3_bitwise(limitStatements2(sArr, sIx), EIGHT).toString().getBytes().clone()[0];
+			dArr[d++] = (byte) limitStatements2(sArr, sIx);
 
 			// If line separator, jump over it.
 			if (sepCnt > 0 && ++cc == 19) {
@@ -448,18 +542,10 @@ abstract class Base64 {
 
 		if (d < len) {
 			// Decode last 1-3 bytes (incl '=') into 1-3 bytes
-			int i = 0;
-			for (int j = 0; sIx <= eIx - pad; j++) {
-				i |= IA[sArr[sIx++]] << (18 - j * 6);
-			}
-
-			for (int r = 16; d < len; r -= 8) {
-				intero = i >> r;
-				dArr[d++] = intero.toString().getBytes().clone()[0];
-			}
-
+			dArr = limitStatements6_for2(d, len, limitStatements5_for(sIx, eIx, pad, sArr), dArr);
 		}
-
-		return dArr;
+		
+		return limitStatements7(byteArr,dArr);
 	}
+	
 }
