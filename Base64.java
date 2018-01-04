@@ -95,19 +95,21 @@ abstract class Base64 {
 	 */
 	private final static byte[] EMPTY_ARRAY = new byte[0];
 	/**
-	 * 
+	 * final static int SIXTEEN 
 	 */
-	final static int SIXTEEN = 16;
+	private final static int SIXTEEN = 16;
 	/**
-	 * 
+	 * final static int EIGHT
 	 */
-	final static int EIGHT = 16;
+	private final static int EIGHT = 16;
 	/**
-	 * 
+	 * final static int 0xff
 	 */
-	final static int N = 0xff;
-
-	private Base64() {
+	private final static int N = 0xff;
+/**
+ * costruttore di default, protected per classi abstract!
+ */
+protected Base64() {
 	}
 
 	private static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
@@ -300,7 +302,8 @@ abstract class Base64 {
 
 	static void encodeLongBits(long bits, JsonStream stream) throws IOException {
 		int n = 0x3f;
-		int i = (int) bits;
+		Long l = bits;
+		int i = l.intValue();
 		byte b1 = BA[Integer
 				.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString((i >>> 18))).longValue(),
 						Long.getLong(Integer.toString(n)).longValue(), '&')))
@@ -319,8 +322,9 @@ abstract class Base64 {
 				.intValue()];
 		Character c = '"';
 		stream.write(c.toString().getBytes().clone()[0], b1, b2, b3, b4);
+		
 		bits = bits >>> 24;
-		i = (int) bits;
+		i = l.intValue();
 		b1 = BA[Integer
 				.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString((i >>> 18))).longValue(),
 						Long.getLong(Integer.toString(n)).longValue(), '&')))
@@ -407,7 +411,7 @@ abstract class Base64 {
 	 * @param sIx
 	 * @return
 	 */
-	private static int limitStatements2(final byte[] sArr, int sIx) {
+	private static Integer limitStatements2(final byte[] sArr, int sIx) {
 		int n0 = 18;
 		int n1 = 12;
 		int n2 = 6;
@@ -485,9 +489,9 @@ abstract class Base64 {
 	 * @param dArr
 	 * @return
 	 */
-	private static byte[] limitStatements7(final byte [] byteArr,final byte [] dArr){
-		byte [] toReturn;
-		if (byteArr.equals(null)) {
+	private static byte[] limitStatements7(final byte [] byteArr, final byte [] dArr){
+		byte [] toReturn = null;
+		if (byteArr.equals(toReturn)) {
 			toReturn = null;
 		}else {
 			toReturn = dArr;
@@ -531,13 +535,11 @@ abstract class Base64 {
 			// Add the bytes
 			dArr[d++] = limitStatements3_bitwise(limitStatements2(sArr, sIx), SIXTEEN).toString().getBytes().clone()[0];
 			dArr[d++] = limitStatements3_bitwise(limitStatements2(sArr, sIx), EIGHT).toString().getBytes().clone()[0];
-			dArr[d++] = (byte) limitStatements2(sArr, sIx);
+			dArr[d++] = limitStatements2(sArr, sIx).byteValue();
 
 			// If line separator, jump over it.
-			if (sepCnt > 0 && ++cc == 19) {
-				sIx += 2;
-				cc = 0;
-			}
+				sIx = (sepCnt > 0 && ++cc == 19) ? sIx+2 : sIx;
+				cc = (sepCnt > 0 && cc == 19) ? 0 : cc;
 		}
 
 		if (d < len) {
