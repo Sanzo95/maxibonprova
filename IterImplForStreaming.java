@@ -233,7 +233,6 @@ class IterImplForStreaming {
 			iter.head = end;
 			return iter.reusableSlice;
 		}
-		// TODO: avoid small memory allocation
 		byte[] part1 = new byte[iter.tail - iter.head];
 		System.arraycopy(iter.buf, iter.head, part1, 0, part1.length);
 		byte[] part2 = null;
@@ -264,8 +263,11 @@ class IterImplForStreaming {
 				byte c = iter.buf[i];
 				switch (c) {
 				case ' ':
+					continue;
 				case '\n':
+					continue;
 				case '\t':
+					continue;
 				case '\r':
 					continue;
 				default:
@@ -338,7 +340,6 @@ class IterImplForStreaming {
 	}
 
 	public static Any readAny(JsonIterator iter) throws IOException {
-		// TODO: avoid small memory allocation
 		iter.skipStartedAt = iter.head;
 		byte c = nextToken(iter);
 		int n1 = 3;
@@ -439,7 +440,9 @@ class IterImplForStreaming {
 					bc = '\r';
 					break;
 				case '"':
+					break;
 				case '/':
+					break;
 				case '\\':
 					break;
 				case 'u':
@@ -460,9 +463,7 @@ class IterImplForStreaming {
 					} else {
 						throw new JsonException("invalid surrogate");
 					}
-
 					break;
-
 				default:
 					throw iter.reportError("readStringSlowPath", "invalid escape character: " + bc);
 				}
@@ -674,19 +675,47 @@ class IterImplForStreaming {
 				byte c = iter.buf[i];
 				switch (c) {
 				case '-':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '+':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '.':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case 'e':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case 'E':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '0':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '1':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '2':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '3':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '4':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '5':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '6':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '7':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '8':
+					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
+					break;
 				case '9':
 					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
 					break;

@@ -165,7 +165,9 @@ public class Base64FloatSupport {
 	 */
 	private static void enableSupp2() {
 		JsoniterSpi.registerTypeEncoder(Float.class, new com.jsoniter.spi.Encoder.ReflectionEncoder() {
-			@Override
+			/**
+			 * @throws IOException
+			 */
 			public void encode(Object obj, JsonStream stream) throws IOException {
 				Float number = null;
 				if (obj instanceof Float) {
@@ -198,7 +200,7 @@ public class Base64FloatSupport {
 	 * @throws JsonException
 	 * @throws IOException
 	 */
-	public static void enableEncodersAndDecoders() {
+	public static void enableEncodersAndDecoders() throws JsonException{
 		boolean enabled = false;
 		synchronized (Base64FloatSupport.class) {
 			if (enabled) {
@@ -210,7 +212,9 @@ public class Base64FloatSupport {
 			enableSupp2();
 
 			JsoniterSpi.registerTypeEncoder(float.class, new com.jsoniter.spi.Encoder.FloatEncoder() {
-				@Override
+				/**
+				 * @throws IOException
+				 */
 				public void encodeFloat(float obj, JsonStream stream) throws IOException {
 					long bits = Double.doubleToRawLongBits(obj);
 					Base64.encodeLongBits(bits, stream);
@@ -226,7 +230,9 @@ public class Base64FloatSupport {
 	 */
 	public static void enableDecoders1() {
 		JsoniterSpi.registerTypeDecoder(Float.class, new Decoder() {
-			@Override
+			/**
+			 * @throws IOException
+			 */
 			public Object decode(JsonIterator iter) throws IOException {
 				byte token = CodegenAccess.nextToken(iter);
 				CodegenAccess.unreadByte(iter);
@@ -241,7 +247,9 @@ public class Base64FloatSupport {
 			}
 		});
 		JsoniterSpi.registerTypeDecoder(float.class, new Decoder.FloatDecoder() {
-			@Override
+			/**
+			 * @throws IOException
+			 */
 			public float decodeFloat(JsonIterator iter) throws IOException {
 				byte token = CodegenAccess.nextToken(iter);
 				CodegenAccess.unreadByte(iter);
@@ -258,12 +266,14 @@ public class Base64FloatSupport {
 
 	/**
 	 * enableDecoders
-	 * 
+	 * @throws IOException
 	 * @see com.jsoniter.spi.Decoder#decode(com.jsoniter.JsonIterator)
 	 */
 	public static void enableDecoders() {
 		JsoniterSpi.registerTypeDecoder(Double.class, new Decoder() {
-			@Override
+			/**
+			 * @throws IOException
+			 */
 			public Object decode(JsonIterator iter) throws IOException {
 				Double doub = null;
 				byte token = CodegenAccess.nextToken(iter);
@@ -277,7 +287,9 @@ public class Base64FloatSupport {
 			}
 		});
 		JsoniterSpi.registerTypeDecoder(double.class, new Decoder.DoubleDecoder() {
-			@Override
+			/**
+			 * @throws IOException
+			 */
 			public double decodeDouble(JsonIterator iter) throws IOException {
 				Double doub = null;
 				byte token = CodegenAccess.nextToken(iter);
