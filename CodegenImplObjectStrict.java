@@ -106,23 +106,20 @@ class CodegenImplObjectStrict {
 	 * @param lines
 	 * @return
 	 */
-	private static StringBuilder secondo(ClassDescriptor desc, StringBuilder lines) {
-		StringBuilder toReturn = lines;
+	private static void secondo(ClassDescriptor desc, StringBuilder lines) {
 		String temp = "";
 		if (!desc.ctor.parameters.isEmpty()) {
 			temp = "%s obj = {{newInst}};";
-			append(toReturn, String.format(temp, CodegenImplNative.getTypeName(desc.clazz)));
+			append(lines, String.format(temp, CodegenImplNative.getTypeName(desc.clazz)));
 			for (Binding field : desc.fields) {
 				temp = "obj.%s = _%s_;";
-				append(toReturn, String.format(temp, field.field.getName(), field.name));
+				append(lines, String.format(temp, field.field.getName(), field.name));
 			}
 			for (Binding setter : desc.setters) {
 				temp = "obj.%s(_%s_);";
-				append(toReturn, String.format(temp, setter.method.getName(), setter.name));
+				append(lines, String.format(temp, setter.method.getName(), setter.name));
 			}
 		}
-		System.out.print(temp);
-		return toReturn;
 	}
 
 	/**
@@ -204,31 +201,29 @@ class CodegenImplObjectStrict {
 	 * @param m
 	 * @return
 	 */
-	private static StringBuilder terzo(List<Binding> bin, ClassDescriptor cD, StringBuilder s, boolean b, long l,
+	private static void terzo(List<Binding> bin, ClassDescriptor cD, StringBuilder lines, boolean b, long l,
 			Map<Integer, Object> m) {
-		StringBuilder toReturn = s;
 		for (WrapperDescriptor wrapper : cD.bindingTypeWrappers) {
 			for (Binding param : wrapper.parameters) {
-				appendVarDef(toReturn, param);
+				appendVarDef(lines, param);
 			}
 		}
 		if (cD.onExtraProperties != null || !cD.keyValueTypeWrappers.isEmpty()) {
-			append(toReturn, "java.util.Map extra = null;");
+			append(lines, "java.util.Map extra = null;");
 		}
-		append(toReturn, "com.jsoniter.spi.Slice field = com.jsoniter.CodegenAccess.readObjectFieldAsSlice(iter);");
-		append(toReturn, "boolean once = true;");
-		append(toReturn, "while (once) {");
-		toReturn = multipleAppend(bin, cD, toReturn, primo(cD, renderTriTree(m)), b, l);
+		append(lines, "com.jsoniter.spi.Slice field = com.jsoniter.CodegenAccess.readObjectFieldAsSlice(iter);");
+		append(lines, "boolean once = true;");
+		append(lines, "while (once) {");
+		lines = multipleAppend(bin, cD, lines, primo(cD, renderTriTree(m)), b, l);
 		if (cD.onExtraProperties != null) {
-			appendSetExtraProperteis(toReturn, cD);
+			appendSetExtraProperteis(lines, cD);
 		}
 		if (!cD.keyValueTypeWrappers.isEmpty()) {
-			appendSetExtraToKeyValueTypeWrappers(toReturn, cD);
+			appendSetExtraToKeyValueTypeWrappers(lines, cD);
 		}
-		toReturn = secondo(cD, toReturn);
-		appendWrappers(cD.bindingTypeWrappers, toReturn);
-		append(toReturn, "return obj;");
-		return toReturn;
+		secondo(cD, lines);
+		appendWrappers(cD.bindingTypeWrappers, lines);
+		append(lines, "return obj;");
 	}
 
 	/**
@@ -261,7 +256,7 @@ class CodegenImplObjectStrict {
 		} else {
 			lines = multipleAppend2(desc, lines, hasRequiredBinding);
 		}
-		lines = terzo(allBindings, desc, lines, hasRequiredBinding, expectedTracker, trieTree);
+		terzo(allBindings, desc, lines, hasRequiredBinding, expectedTracker, trieTree);
 		return lines.toString().replace("{{clazz}}", desc.clazz.getCanonicalName()).replace("{{newInst}}",
 				CodegenImplObjectHash.genNewInstCode(desc.clazz, desc.ctor));
 	}
@@ -526,8 +521,7 @@ class CodegenImplObjectStrict {
 	 * @param lines
 	 * @return
 	 */
-	private static StringBuilder quarto(Map.Entry<Byte, Object> entry, StringBuilder lines) {
-		StringBuilder toReturn = lines;
+	private static void quarto(Map.Entry<Byte, Object> entry, StringBuilder lines) {
 		Binding field = null;
 		boolean support = false;
 		if (entry.getValue() instanceof Binding) {
@@ -535,34 +529,21 @@ class CodegenImplObjectStrict {
 		}
 		if (field.asExtraWhenPresent) {
 			support = true;
-			append(toReturn, String.format(QUARTO.replace('\'', '"'), field.name));
+			append(lines, String.format(QUARTO.replace('\'', '"'), field.name));
 		} else if (field.shouldSkip) {
 			support = true;
-			append(toReturn, "iter.skip();");
-			append(toReturn, "continue;");
+			append(lines, "iter.skip();");
+			append(lines, "continue;");
 		} else if (!support) {
 			support = true;
-			append(toReturn, String.format("_%s_ = %s;", field.name, CodegenImplNative.genField(field)));
+			append(lines, String.format("_%s_ = %s;", field.name, CodegenImplNative.genField(field)));
 		}
 		if (field.asMissingWhenNotPresent && support) {
-			append(toReturn, "tracker = tracker | " + field.mask + "L;");
+			append(lines, "tracker = tracker | " + field.mask + "L;");
 		}
-		toReturn = quartoSupport(support, toReturn);
-		return toReturn;
-	}
-
-	/**
-	 * 
-	 * @param support
-	 * @param toReturn
-	 * @return
-	 */
-	private static StringBuilder quartoSupport(boolean support, StringBuilder toReturn) {
-		StringBuilder temp = toReturn;
 		if (support) {
-			append(temp, "continue;");
+			append(lines, "continue;");
 		}
-		return temp;
 	}
 
 	/**
@@ -575,23 +556,21 @@ class CodegenImplObjectStrict {
 	 * @param b
 	 * @return
 	 */
-	private static StringBuilder settimo(int i, int len, StringBuilder lines, List<Byte> bytesToCompare,
+	private static void settimo(int i, int len, StringBuilder lines, List<Byte> bytesToCompare,
 			Map.Entry<Byte, Object> entry, Byte b) {
-		StringBuilder toReturn = lines;
 		int size = 0;
 		if (i == len - 1) {
-			append(toReturn, "if (");
+			append(lines, "if (");
 			size = bytesToCompare.size();
 			for (int j = 0; j < size; j++) {
 				Byte a = bytesToCompare.get(j);
-				append(toReturn, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
+				append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
 			}
-			append(toReturn, String.format("field.at(%d)==%s", i, b));
-			append(toReturn, ") {");
-			toReturn = quarto(entry, toReturn);
-			append(toReturn, PARENTESICHIUSA);
+			append(lines, String.format("field.at(%d)==%s", i, b));
+			append(lines, ") {");
+			quarto(entry, lines);
+			append(lines, PARENTESICHIUSA);
 		}
-		return toReturn;
 	}
 
 	/**
@@ -604,9 +583,8 @@ class CodegenImplObjectStrict {
 	 * @param next
 	 * @return
 	 */
-	private static StringBuilder ottavo(StringBuilder lines, int i, int len, List<Byte> bytesToCompare, Byte b,
+	private static void ottavo(StringBuilder lines, int i, int len, List<Byte> bytesToCompare, Byte b,
 			Map<Byte, Object> next) {
-		StringBuilder toReturn = lines;
 		append(lines, "if (");
 		int size = bytesToCompare.size();
 		for (int j = 0; j < size; j++) {
@@ -617,7 +595,6 @@ class CodegenImplObjectStrict {
 		append(lines, ") {");
 		addFieldDispatch(lines, len, i + 1, next, new ArrayList<Byte>());
 		append(lines, PARENTESICHIUSA);
-		return toReturn;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -636,7 +613,7 @@ class CodegenImplObjectStrict {
 		for (Map.Entry<Byte, Object> entry : setSize) {
 			Map<Byte, Object> next = null;
 			Byte b = entry.getKey();
-			lines = settimo(i, len, lines, bytesToCompare, entry, b);
+			settimo(i, len, lines, bytesToCompare, entry, b);
 			if (entry.getValue() instanceof Map<?, ?>) {
 				next = (Map<Byte, Object>) entry.getValue();
 			}
@@ -646,7 +623,7 @@ class CodegenImplObjectStrict {
 				addFieldDispatch(lines, len, i + 1, next, nextBytesToCompare);
 				continue;
 			}
-			lines = ottavo(lines, i, len, bytesToCompare, b, next);
+			ottavo(lines, i, len, bytesToCompare, b, next);
 		}
 	}
 

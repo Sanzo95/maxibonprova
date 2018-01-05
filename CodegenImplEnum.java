@@ -103,53 +103,92 @@ class CodegenImplEnum {
 		return switchBody.toString();
 	}
 
+	/**
+	 * 
+	 * @param lines
+	 * @param bytesToCompare
+	 * @param entry
+	 * @param i
+	 * @param b
+	 * @return
+	 */
+	private static void primo(StringBuilder lines, List<Byte> bytesToCompare, Map.Entry<Byte, Object> entry,
+			int i, Byte b) {
+		append(lines, "if (");
+		int size = bytesToCompare.size();
+		for (int j = 0; j < size; j++) {
+			Byte a = bytesToCompare.get(j);
+			append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
+		}
+		append(lines, String.format("field.at(%d)==%s", i, b));
+		append(lines, ") {");
+		Object e = entry.getValue();
+		append(lines, String.format("return %s.%s;", e.getClass().getName(), e.toString()));
+		append(lines, "}");
+	}
+
+	@SuppressWarnings("unchecked")
+	/**
+	 * 
+	 * @param entry
+	 * @return
+	 */
+	private static Map<Byte, Object> secondo(Map.Entry<Byte, Object> entry) {
+		Map<Byte, Object> next = null;
+		if (entry.getValue() instanceof Map<?, ?>) {
+			next = (Map<Byte, Object>) entry.getValue();
+		}
+		return next;
+	}
+
+	/**
+	 * 
+	 * @param nextBytesToCompare
+	 * @param bytesToCompare
+	 * @param b
+	 * @return
+	 */
+	private static List<Byte> terzo(List<Byte> nextBytesToCompare, List<Byte> bytesToCompare, Byte b) {
+		List<Byte> toReturn = nextBytesToCompare;
+		toReturn = new ArrayList<Byte>(bytesToCompare);
+		toReturn.add(b);
+		return toReturn;
+	}
+
+	/**
+	 * 
+	 * @param lines
+	 * @param len
+	 * @param i
+	 * @param current
+	 * @param bytesToCompare
+	 */
 	private static void addFieldDispatch(StringBuilder lines, int len, int i, Map<Byte, Object> current,
 			List<Byte> bytesToCompare) {
-		try {
-			Set<Map.Entry<Byte, Object>> setSize = current.entrySet();
-			List<Byte> nextBytesToCompare = null;
-			for (Map.Entry<Byte, Object> entry : setSize) {
-				Byte b = entry.getKey();
-				if (i == len - 1) {
-					append(lines, "if (");
-					int size = bytesToCompare.size();
-					for (int j = 0; j < size; j++) {
-						Byte a = bytesToCompare.get(j);
-						append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
-					}
-					append(lines, String.format("field.at(%d)==%s", i, b));
-					append(lines, ") {");
-					Object e = entry.getValue();
-					append(lines, String.format("return %s.%s;", e.getClass().getName(), e.toString()));
-					append(lines, "}");
-					continue;
-				}
-				Map<Byte, Object> next = null;
-
-				if (entry.getValue() instanceof Map<?, ?>) {
-					next = (Map<Byte, Object>) entry.getValue();
-				}
-				if (next.size() == 1) {
-					nextBytesToCompare = new ArrayList<Byte>(bytesToCompare);
-					nextBytesToCompare.add(b);
-					addFieldDispatch(lines, len, i + 1, next, nextBytesToCompare);
-					continue;
-				}
-				append(lines, "if (");
-				int size = bytesToCompare.size();
-				for (int j = 0; j < size; j++) {
-					Byte a = bytesToCompare.get(j);
-					append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
-				}
-				append(lines, String.format("field.at(%d)==%s", i, b));
-				append(lines, ") {");
-				addFieldDispatch(lines, len, i + 1, next, new ArrayList<Byte>());
-				append(lines, "}");
+		Set<Map.Entry<Byte, Object>> setSize = current.entrySet();
+		List<Byte> nextBytesToCompare = null;
+		for (Map.Entry<Byte, Object> entry : setSize) {
+			Byte b = entry.getKey();
+			if (i == len - 1) {
+				primo(lines, bytesToCompare, entry, i, b);
+				continue;
 			}
-		} catch (Exception e1) {
-			System.out.println("Exception " + e1);
-		} finally {
-			System.out.print("");
+			Map<Byte, Object> next = secondo(entry);
+			if (next.size() == 1) {
+				nextBytesToCompare = terzo(nextBytesToCompare, bytesToCompare, b);
+				addFieldDispatch(lines, len, i + 1, next, nextBytesToCompare);
+				continue;
+			}
+			append(lines, "if (");
+			int size = bytesToCompare.size();
+			for (int j = 0; j < size; j++) {
+				Byte a = bytesToCompare.get(j);
+				append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
+			}
+			append(lines, String.format("field.at(%d)==%s", i, b));
+			append(lines, ") {");
+			addFieldDispatch(lines, len, i + 1, next, new ArrayList<Byte>());
+			append(lines, "}");
 		}
 	}
 
