@@ -191,13 +191,23 @@ class CodegenImplObjectHash {
 		return s;
 	}
 
+	/**
+	 * metodo di supporto per non effettuare cast tra primitivi
+	 * @param l
+	 * @return
+	 */
+	private static int longToInt(long l) {
+		Long intero = l;
+		return intero.intValue();
+	}
+	
 	public static int calcHash(String fromName) {
 		long hash = 0x811c9dc5;
 		for (byte b : fromName.getBytes()) {
 			hash ^= b;
 			hash *= 0x1000193;
 		}
-		return (int) hash;
+		return longToInt(hash);
 	}
 
 	private static Object appendBindingSet(StringBuilder lines, ClassDescriptor desc, Binding binding) {
