@@ -284,13 +284,26 @@ class CodegenImplNative {
 				throw new JsonException(decodeFor + cK + "must implement Decoder.BooleanDecoder");
 			}
 			s = String.format("com.jsoniter.CodegenAccess.readBoolean(\"%s\", iter)", cK);
-		}
-		if (vT == byte.class) {
+		} else if (vT == byte.class) {
 			if ((d instanceof Decoder.ShortDecoder) == false) {
 				throw new JsonException(decodeFor + cK + "must implement Decoder.ShortDecoder");
 			}
 			s = String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cK);
+		} else {
+			s = limitStatements3Bis(vT, d, cK);
 		}
+		return s;
+	}
+
+	/**
+	 * 
+	 * @param vT
+	 * @param d
+	 * @param cK
+	 * @return
+	 */
+	private static String limitStatements3Bis(Type vT, Decoder d, String cK) {
+		String s = "null3";
 		if (vT == short.class) {
 			if ((d instanceof Decoder.ShortDecoder) == false) {
 				throw new JsonException(decodeFor + cK + "must implement Decoder.ShortDecoder");
@@ -320,13 +333,25 @@ class CodegenImplNative {
 				throw new JsonException(decodeFor + cK + "must implement Decoder.IntDecoder");
 			}
 			s = String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK);
-		}
-		if (vT == long.class) {
+		}else if (vT == long.class) {
 			if ((d instanceof Decoder.LongDecoder) == false) {
 				throw new JsonException(decodeFor + cK + "must implement Decoder.LongDecoder");
 			}
 			s = String.format("com.jsoniter.CodegenAccess.readLong(\"%s\", iter)", cK);
+		}else {
+			s= limitStatements4Bis(vT,d,cK);
 		}
+		return s;
+	}
+	/**
+	 * 
+	 * @param vT
+	 * @param d
+	 * @param cK
+	 * @return
+	 */
+	private static String limitStatements4Bis(Type vT, Decoder d, String cK) {
+		String s = "null4";
 		if (vT == float.class) {
 			if ((d instanceof Decoder.FloatDecoder) == false) {
 				throw new JsonException(decodeFor + cK + "must implement Decoder.FloatDecoder");
@@ -347,9 +372,6 @@ class CodegenImplNative {
 		Decoder decoder = JsoniterSpi.getDecoder(cacheKey);
 		String toReturn1 = "null1";
 		String toReturn2 = "null2";
-		String toReturn3 = "null3";
-		String toReturn4 = "null4";
-
 		if (decoder == null) {
 			// if cache key is for field, and there is no field decoder
 			// specified
@@ -360,7 +382,9 @@ class CodegenImplNative {
 			Codegen.getDecoder(cacheKey, valueType);
 			toReturn2 = limitStatements2(cacheKey);
 		}
+		String toReturn3 = "null3";
 		toReturn3 = limitStatements3(valueType, decoder, cacheKey);
+		String toReturn4 = "null4";
 		toReturn4 = limitStatements4(valueType, decoder, cacheKey);
 		String toReturn5 = String.format("com.jsoniter.CodegenAccess.read(\"%s\", iter)", cacheKey);
 		return "null1".equals(toReturn1) ? "null2".equals(toReturn2)
