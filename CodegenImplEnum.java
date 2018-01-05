@@ -16,10 +16,15 @@ import com.jsoniter.spi.ClassInfo;
  *
  */
 class CodegenImplEnum {
-
+	/**
+	 * constructor
+	 */
 	private CodegenImplEnum() {
 	}
 
+	/**
+	 * sbsize
+	 */
 	private final static int SBSIZE = 128;
 
 	/**
@@ -41,45 +46,64 @@ class CodegenImplEnum {
 		return lines.toString();
 	}
 
+	@SuppressWarnings("unchecked")
+	/**
+	 * 
+	 * @param fromNameBytes
+	 * @param current
+	 * @return
+	 */
+	private static Map<Byte, Object> quarto(byte[] fromNameBytes, Map<Byte, Object> current) {
+		Map<Byte, Object> temp = current;
+		for (int i = 0; i < fromNameBytes.length - 1; i++) {
+			byte b = fromNameBytes[i];
+			Map<Byte, Object> next = null;
+
+			if (temp.get(b) instanceof Map<?, ?>) {
+				next = (Map<Byte, Object>) temp.get(b);
+			}
+
+			if (next == null) {
+				next = new HashMap<Byte, Object>();
+				temp.put(b, next);
+			}
+			temp = next;
+		}
+		return temp;
+	}
+
+	@SuppressWarnings("unchecked")
+	/**
+	 * 
+	 * @param allConsts
+	 * @return
+	 */
 	private static Map<Integer, Object> buildTriTree(List<Object> allConsts) {
 		Map<Integer, Object> trieTree = new HashMap<Integer, Object>();
-		try {
-			for (Object e : allConsts) {
-				byte[] fromNameBytes = e.toString().getBytes();
-				Map<Byte, Object> current = null;
+		for (Object e : allConsts) {
+			byte[] fromNameBytes = e.toString().getBytes();
+			Map<Byte, Object> current = null;
 
-				if (trieTree.get(fromNameBytes.length) instanceof Map<?, ?>) {
-					current = (Map<Byte, Object>) trieTree.get(fromNameBytes.length);
-				}
-
-				if (current == null) {
-					current = new HashMap<Byte, Object>();
-					trieTree.put(fromNameBytes.length, current);
-				}
-				for (int i = 0; i < fromNameBytes.length - 1; i++) {
-					byte b = fromNameBytes[i];
-					Map<Byte, Object> next = null;
-
-					if (current.get(b) instanceof Map<?, ?>) {
-						next = (Map<Byte, Object>) current.get(b);
-					}
-
-					if (next == null) {
-						next = new HashMap<Byte, Object>();
-						current.put(b, next);
-					}
-					current = next;
-				}
-				current.put(fromNameBytes[fromNameBytes.length - 1], e);
+			if (trieTree.get(fromNameBytes.length) instanceof Map<?, ?>) {
+				current = (Map<Byte, Object>) trieTree.get(fromNameBytes.length);
 			}
-		} catch (Exception e1) {
-			System.out.println("Exception " + e1);
-		} finally {
-			System.out.print("");
+
+			if (current == null) {
+				current = new HashMap<Byte, Object>();
+				trieTree.put(fromNameBytes.length, current);
+			}
+			current = quarto(fromNameBytes, current);
+			current.put(fromNameBytes[fromNameBytes.length - 1], e);
 		}
 		return trieTree;
 	}
 
+	@SuppressWarnings("unchecked")
+	/**
+	 * 
+	 * @param trieTree
+	 * @return
+	 */
 	private static String renderTriTree(Map<Integer, Object> trieTree) {
 		StringBuilder switchBody = new StringBuilder(SBSIZE);
 		try {
@@ -112,8 +136,8 @@ class CodegenImplEnum {
 	 * @param b
 	 * @return
 	 */
-	private static void primo(StringBuilder lines, List<Byte> bytesToCompare, Map.Entry<Byte, Object> entry,
-			int i, Byte b) {
+	private static void primo(StringBuilder lines, List<Byte> bytesToCompare, Map.Entry<Byte, Object> entry, int i,
+			Byte b) {
 		append(lines, "if (");
 		int size = bytesToCompare.size();
 		for (int j = 0; j < size; j++) {
@@ -158,6 +182,29 @@ class CodegenImplEnum {
 	/**
 	 * 
 	 * @param lines
+	 * @param bytesToCompare
+	 * @param i
+	 * @param b
+	 * @param len
+	 * @param next
+	 */
+	private static void multipleAppend(StringBuilder lines, List<Byte> bytesToCompare, int i, Byte b, int len,
+			Map<Byte, Object> next) {
+		append(lines, "if (");
+		int size = bytesToCompare.size();
+		for (int j = 0; j < size; j++) {
+			Byte a = bytesToCompare.get(j);
+			append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
+		}
+		append(lines, String.format("field.at(%d)==%s", i, b));
+		append(lines, ") {");
+		addFieldDispatch(lines, len, i + 1, next, new ArrayList<Byte>());
+		append(lines, "}");
+	}
+
+	/**
+	 * 
+	 * @param lines
 	 * @param len
 	 * @param i
 	 * @param current
@@ -179,19 +226,15 @@ class CodegenImplEnum {
 				addFieldDispatch(lines, len, i + 1, next, nextBytesToCompare);
 				continue;
 			}
-			append(lines, "if (");
-			int size = bytesToCompare.size();
-			for (int j = 0; j < size; j++) {
-				Byte a = bytesToCompare.get(j);
-				append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
-			}
-			append(lines, String.format("field.at(%d)==%s", i, b));
-			append(lines, ") {");
-			addFieldDispatch(lines, len, i + 1, next, new ArrayList<Byte>());
-			append(lines, "}");
+			multipleAppend(lines, bytesToCompare, i, b, len, next);
 		}
 	}
 
+	/**
+	 * 
+	 * @param lines
+	 * @param str
+	 */
 	private static void append(StringBuilder lines, String str) {
 		lines.append(str);
 		lines.append("\n");

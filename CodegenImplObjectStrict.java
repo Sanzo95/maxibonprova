@@ -133,32 +133,30 @@ class CodegenImplObjectStrict {
 	 * @param expectedTracker
 	 * @return
 	 */
-	private static StringBuilder multipleAppend(List<Binding> allBindings, ClassDescriptor desc, StringBuilder lines,
+	private static void multipleAppend(List<Binding> allBindings, ClassDescriptor desc, StringBuilder lines,
 			String rendered, boolean hasRequiredBinding, long expectedTracker) {
-		StringBuilder toReturn = lines;
-		append(toReturn, "once = false;");
+		append(lines, "once = false;");
 		if (hasAnythingToBindFrom(allBindings)) {
-			append(toReturn, "switch (field.len()) {");
-			append(toReturn, rendered);
-			append(toReturn, PARENTESICHIUSA);
+			append(lines, "switch (field.len()) {");
+			append(lines, rendered);
+			append(lines, PARENTESICHIUSA);
 		}
-		appendOnUnknownField(toReturn, desc);
-		append(toReturn, PARENTESICHIUSA);
-		append(toReturn, "while (com.jsoniter.CodegenAccess.nextToken(iter) == ',') {");
-		append(toReturn, "field = com.jsoniter.CodegenAccess.readObjectFieldAsSlice(iter);");
+		appendOnUnknownField(lines, desc);
+		append(lines, PARENTESICHIUSA);
+		append(lines, "while (com.jsoniter.CodegenAccess.nextToken(iter) == ',') {");
+		append(lines, "field = com.jsoniter.CodegenAccess.readObjectFieldAsSlice(iter);");
 		if (hasAnythingToBindFrom(allBindings)) {
-			append(toReturn, "switch (field.len()) {");
-			append(toReturn, rendered);
-			append(toReturn, PARENTESICHIUSA); // end of switch
+			append(lines, "switch (field.len()) {");
+			append(lines, rendered);
+			append(lines, PARENTESICHIUSA); // end of switch
 		}
-		appendOnUnknownField(toReturn, desc);
-		append(toReturn, PARENTESICHIUSA); // end of while
+		appendOnUnknownField(lines, desc);
+		append(lines, PARENTESICHIUSA); // end of while
 		if (hasRequiredBinding) {
-			append(toReturn, "if (tracker != " + expectedTracker + "L) {");
-			appendMissingRequiredProperties(toReturn, desc);
-			append(toReturn, PARENTESICHIUSA);
+			append(lines, "if (tracker != " + expectedTracker + "L) {");
+			appendMissingRequiredProperties(lines, desc);
+			append(lines, PARENTESICHIUSA);
 		}
-		return toReturn;
 	}
 
 	/**
@@ -214,7 +212,7 @@ class CodegenImplObjectStrict {
 		append(lines, "com.jsoniter.spi.Slice field = com.jsoniter.CodegenAccess.readObjectFieldAsSlice(iter);");
 		append(lines, "boolean once = true;");
 		append(lines, "while (once) {");
-		lines = multipleAppend(bin, cD, lines, primo(cD, renderTriTree(m)), b, l);
+		multipleAppend(bin, cD, lines, primo(cD, renderTriTree(m)), b, l);
 		if (cD.onExtraProperties != null) {
 			appendSetExtraProperteis(lines, cD);
 		}
@@ -584,7 +582,7 @@ class CodegenImplObjectStrict {
 	 * @return
 	 */
 	private static void ottavo(StringBuilder lines, int i, int len, List<Byte> bytesToCompare, Byte b,
-			Map<Byte, Object> next) {
+			Map<Byte, Object> next){
 		append(lines, "if (");
 		int size = bytesToCompare.size();
 		for (int j = 0; j < size; j++) {
