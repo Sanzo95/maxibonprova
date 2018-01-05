@@ -49,32 +49,6 @@ class CodegenImplEnum {
 	@SuppressWarnings("unchecked")
 	/**
 	 * 
-	 * @param fromNameBytes
-	 * @param current
-	 * @return
-	 */
-	private static Map<Byte, Object> quarto(byte[] fromNameBytes, Map<Byte, Object> current) {
-		Map<Byte, Object> temp = current;
-		for (int i = 0; i < fromNameBytes.length - 1; i++) {
-			byte b = fromNameBytes[i];
-			Map<Byte, Object> next = null;
-
-			if (temp.get(b) instanceof Map<?, ?>) {
-				next = (Map<Byte, Object>) temp.get(b);
-			}
-
-			if (next == null) {
-				next = new HashMap<Byte, Object>();
-				temp.put(b, next);
-			}
-			temp = next;
-		}
-		return temp;
-	}
-
-	@SuppressWarnings("unchecked")
-	/**
-	 * 
 	 * @param allConsts
 	 * @return
 	 */
@@ -82,17 +56,15 @@ class CodegenImplEnum {
 		Map<Integer, Object> trieTree = new HashMap<Integer, Object>();
 		for (Object e : allConsts) {
 			byte[] fromNameBytes = e.toString().getBytes();
-			Map<Byte, Object> current = null;
+			Map<Byte, Object> current = new HashMap<Byte, Object>();
+			;
 
 			if (trieTree.get(fromNameBytes.length) instanceof Map<?, ?>) {
 				current = (Map<Byte, Object>) trieTree.get(fromNameBytes.length);
-			}
-
-			if (current == null) {
-				current = new HashMap<Byte, Object>();
+			} else {
 				trieTree.put(fromNameBytes.length, current);
 			}
-			current = quarto(fromNameBytes, current);
+			current = quinto(fromNameBytes, current);
 			current.put(fromNameBytes[fromNameBytes.length - 1], e);
 		}
 		return trieTree;
@@ -106,23 +78,17 @@ class CodegenImplEnum {
 	 */
 	private static String renderTriTree(Map<Integer, Object> trieTree) {
 		StringBuilder switchBody = new StringBuilder(SBSIZE);
-		try {
-			for (Map.Entry<Integer, Object> entry : trieTree.entrySet()) {
-				Integer len = entry.getKey();
-				switchBody.append("case " + len + ": \n");
-				Map<Byte, Object> current = null;
+		for (Map.Entry<Integer, Object> entry : trieTree.entrySet()) {
+			Integer len = entry.getKey();
+			switchBody.append("case " + len + ": \n");
+			Map<Byte, Object> current = null;
 
-				if (entry.getValue() instanceof Map<?, ?>) {
-					current = (Map<Byte, Object>) entry.getValue();
-				}
-
-				addFieldDispatch(switchBody, len, 0, current, new ArrayList<Byte>());
-				switchBody.append("break; \n");
+			if (entry.getValue() instanceof Map<?, ?>) {
+				current = (Map<Byte, Object>) entry.getValue();
 			}
-		} catch (Exception e1) {
-			System.out.println("Exception " + e1);
-		} finally {
-			System.out.print("");
+
+			addFieldDispatch(switchBody, len, 0, current, new ArrayList<Byte>());
+			switchBody.append("break; \n");
 		}
 		return switchBody.toString();
 	}
@@ -130,19 +96,18 @@ class CodegenImplEnum {
 	/**
 	 * 
 	 * @param lines
-	 * @param bytesToCompare
+	 * @param bTC
 	 * @param entry
 	 * @param i
 	 * @param b
 	 * @return
 	 */
-	private static void primo(StringBuilder lines, List<Byte> bytesToCompare, Map.Entry<Byte, Object> entry, int i,
-			Byte b) {
+	private static void primo(StringBuilder lines, List<Byte> bTC, Map.Entry<Byte, Object> entry, int i, Byte b) {
 		append(lines, "if (");
-		int size = bytesToCompare.size();
+		int size = bTC.size();
 		for (int j = 0; j < size; j++) {
-			Byte a = bytesToCompare.get(j);
-			append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
+			Byte a = bTC.get(j);
+			append(lines, String.format("field.at(%d)==%s && ", i - bTC.size() + j, a));
 		}
 		append(lines, String.format("field.at(%d)==%s", i, b));
 		append(lines, ") {");
@@ -182,19 +147,18 @@ class CodegenImplEnum {
 	/**
 	 * 
 	 * @param lines
-	 * @param bytesToCompare
+	 * @param bTC
 	 * @param i
 	 * @param b
 	 * @param len
 	 * @param next
 	 */
-	private static void multipleAppend(StringBuilder lines, List<Byte> bytesToCompare, int i, Byte b, int len,
-			Map<Byte, Object> next) {
+	private static void quarto(StringBuilder lines, List<Byte> bTC, int i, Byte b, int len, Map<Byte, Object> next) {
 		append(lines, "if (");
-		int size = bytesToCompare.size();
+		int size = bTC.size();
 		for (int j = 0; j < size; j++) {
-			Byte a = bytesToCompare.get(j);
-			append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
+			Byte a = bTC.get(j);
+			append(lines, String.format("field.at(%d)==%s && ", i - bTC.size() + j, a));
 		}
 		append(lines, String.format("field.at(%d)==%s", i, b));
 		append(lines, ") {");
@@ -207,27 +171,52 @@ class CodegenImplEnum {
 	 * @param lines
 	 * @param len
 	 * @param i
-	 * @param current
-	 * @param bytesToCompare
+	 * @param c
+	 * @param bTC
 	 */
-	private static void addFieldDispatch(StringBuilder lines, int len, int i, Map<Byte, Object> current,
-			List<Byte> bytesToCompare) {
-		Set<Map.Entry<Byte, Object>> setSize = current.entrySet();
+	private static void addFieldDispatch(StringBuilder lines, int len, int i, Map<Byte, Object> c, List<Byte> bTC) {
+		Set<Map.Entry<Byte, Object>> setSize = c.entrySet();
 		List<Byte> nextBytesToCompare = null;
 		for (Map.Entry<Byte, Object> entry : setSize) {
 			Byte b = entry.getKey();
 			if (i == len - 1) {
-				primo(lines, bytesToCompare, entry, i, b);
+				primo(lines, bTC, entry, i, b);
 				continue;
 			}
 			Map<Byte, Object> next = secondo(entry);
 			if (next.size() == 1) {
-				nextBytesToCompare = terzo(nextBytesToCompare, bytesToCompare, b);
+				nextBytesToCompare = terzo(nextBytesToCompare, bTC, b);
 				addFieldDispatch(lines, len, i + 1, next, nextBytesToCompare);
 				continue;
 			}
-			multipleAppend(lines, bytesToCompare, i, b, len, next);
+			quarto(lines, bTC, i, b, len, next);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	/**
+	 * 
+	 * @param fromNameBytes
+	 * @param current
+	 * @return
+	 */
+	private static Map<Byte, Object> quinto(byte[] fromNameBytes, Map<Byte, Object> current) {
+		Map<Byte, Object> temp = current;
+		for (int i = 0; i < fromNameBytes.length - 1; i++) {
+			byte b = fromNameBytes[i];
+			Map<Byte, Object> next = null;
+
+			if (temp.get(b) instanceof Map<?, ?>) {
+				next = (Map<Byte, Object>) temp.get(b);
+			}
+
+			if (next == null) {
+				next = new HashMap<Byte, Object>();
+				temp.put(b, next);
+			}
+			temp = next;
+		}
+		return temp;
 	}
 
 	/**
