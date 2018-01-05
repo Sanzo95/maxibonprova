@@ -445,13 +445,14 @@ class IterImplForStreaming {
 							+ (IterImplString.translateHex(readByte(iter)) << 8)
 							+ (IterImplString.translateHex(readByte(iter)) << 4)
 							+ IterImplString.translateHex(readByte(iter));
-
-					if ((isExpectingLowSurrogate && Character.isHighSurrogate((char) bc))
-							|| (!isExpectingLowSurrogate && Character.isLowSurrogate((char) bc))) {
+					boolean b1 = Character.isHighSurrogate((char) bc);
+					boolean b2 = Character.isLowSurrogate((char) bc);
+					if ((isExpectingLowSurrogate && b1)
+							|| (!isExpectingLowSurrogate && b2)) {
 						throw new JsonException("invalid surrogate");
-					} else if (!isExpectingLowSurrogate && Character.isHighSurrogate((char) bc)) {
+					} else if (!isExpectingLowSurrogate && b1) {
 						isExpectingLowSurrogate = true;
-					} else if (isExpectingLowSurrogate && Character.isLowSurrogate((char) bc)) {
+					} else if (isExpectingLowSurrogate && b2) {
 						isExpectingLowSurrogate = false;
 					} else {
 						throw new JsonException("invalid surrogate");
