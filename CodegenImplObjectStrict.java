@@ -25,12 +25,27 @@ import com.jsoniter.spi.WrapperDescriptor;
  *
  */
 class CodegenImplObjectStrict {
-
+	/**
+	 * CONSTRUCTOR
+	 */
 	private CodegenImplObjectStrict() {
 	}
 
-	static final String parentesiChiusa = "}";
-	static final String zero = "0";
+	/**
+	 * }
+	 */
+	static final String PARENTESICHIUSA = "}";
+	/**
+	 * {
+	 */
+	static final String PARENTESIAPERTA = "{";
+	/**
+	 * 0
+	 */
+	static final String ZERO = "0";
+	/**
+	 * 128
+	 */
 	private final static int SBSIZE = 128;
 	/**
 	 * static Map<String, String> DEFAULT_VALUES
@@ -46,14 +61,95 @@ class CodegenImplObjectStrict {
 			put("double", "0.0d");
 			put("boolean", "false");
 			String byt = "byte";
-			String num = zero;
+			String num = ZERO;
 			put(byt, num);
-			put("short", zero);
-			put("int", zero);
-			put("char", zero);
-			put("long", zero);
+			put("short", ZERO);
+			put("int", ZERO);
+			put("char", ZERO);
+			put("long", ZERO);
 		}
 	};
+
+	/**
+	 * 
+	 * @param desc
+	 * @param rendered
+	 * @return
+	 */
+	private static String primo(ClassDescriptor desc, String rendered) {
+		String toReturn = rendered;
+		if (desc.ctor.parameters.isEmpty()) {
+			// if not field or setter, the value will set to temp variable
+			for (Binding field : desc.fields) {
+				toReturn = updateBindingSetOp(rendered, field);
+			}
+			for (Binding setter : desc.setters) {
+				toReturn = updateBindingSetOp(rendered, setter);
+			}
+		}
+		return toReturn;
+	}
+	/**
+	 * 
+	 * @param desc
+	 * @param lines
+	 * @return
+	 */
+	private static StringBuilder secondo(ClassDescriptor desc, StringBuilder lines) {
+		StringBuilder toReturn = lines;
+		if (!desc.ctor.parameters.isEmpty()) {
+			append(toReturn, String.format("%s obj = {{newInst}};", CodegenImplNative.getTypeName(desc.clazz)));
+			for (Binding field : desc.fields) {
+				append(toReturn, String.format("obj.%s = _%s_;", field.field.getName(), field.name));
+			}
+			for (Binding setter : desc.setters) {
+				append(toReturn, String.format("obj.%s(_%s_);", setter.method.getName(), setter.name));
+			}
+		}
+		return toReturn;
+	}
+	/**
+	 * 
+	 * @param allBindings
+	 * @param desc
+	 * @param lines
+	 * @param rendered
+	 * @param hasRequiredBinding
+	 * @param expectedTracker
+	 * @return
+	 */
+	private static StringBuilder multipleAppend(List<Binding> allBindings, ClassDescriptor desc, StringBuilder lines,
+			String rendered, boolean hasRequiredBinding, long expectedTracker) {
+		StringBuilder toReturn = lines;
+		if (hasAnythingToBindFrom(allBindings)) {
+			append(toReturn, "switch (field.len()) {");
+			append(toReturn, rendered);
+			append(toReturn, PARENTESICHIUSA);
+		}
+		appendOnUnknownField(toReturn, desc);
+		append(toReturn, PARENTESICHIUSA);
+		append(toReturn, "while (com.jsoniter.CodegenAccess.nextToken(iter) == ',') {");
+		append(toReturn, "field = com.jsoniter.CodegenAccess.readObjectFieldAsSlice(iter);");
+		if (hasAnythingToBindFrom(allBindings)) {
+			append(toReturn, "switch (field.len()) {");
+			append(toReturn, rendered);
+			append(toReturn, PARENTESICHIUSA); // end of switch
+		}
+		appendOnUnknownField(toReturn, desc);
+		append(toReturn, PARENTESICHIUSA); // end of while
+		if (hasRequiredBinding) {
+			append(toReturn, "if (tracker != " + expectedTracker + "L) {");
+			appendMissingRequiredProperties(toReturn, desc);
+			append(toReturn, PARENTESICHIUSA);
+		}
+		return toReturn;
+	}
+	
+	private static void multipleAppend2 () {
+		
+	}
+	
+	
 
 	/**
 	 * genObjectUsingStrict.
@@ -68,20 +164,11 @@ class CodegenImplObjectStrict {
 		long expectedTracker = Long.MAX_VALUE >> (63 - lastRequiredIdx);
 		Map<Integer, Object> trieTree = buildTriTree(allBindings);
 		StringBuilder lines = new StringBuilder(SBSIZE);
-		/*
-		 * only strict mode binding support missing/extra properties tracking 1.
-		 * if null, return null 2. if empty, return empty 3. bind first field 4.
-		 * while (nextToken() == ',') { bind more fields } 5. handle
-		 * missing/extra properties 6. create obj with args (if ctor binding) 7.
-		 * assign fields to obj (if ctor binding) 8. apply multi param wrappers
-		 */
-		// === if null, return null
 		append(lines, "java.lang.Object existingObj = com.jsoniter.CodegenAccess.resetExistingObject(iter);");
 		append(lines, "if (iter.readNull()) { return null; }");
-		// === if input is empty obj, return empty obj
 		if (hasRequiredBinding) {
 			append(lines, "long tracker = 0;");
-		}
+		}//11
 		if (desc.ctor.parameters.isEmpty()) {
 			append(lines, "{{clazz}} obj = {{newInst}};");
 			append(lines, "if (!com.jsoniter.CodegenAccess.readObjectStart(iter)) {");
@@ -89,11 +176,7 @@ class CodegenImplObjectStrict {
 				appendMissingRequiredProperties(lines, desc);
 			}
 			append(lines, "return obj;");
-			String parentesi = "{";
-			append(lines, parentesi);
-			// because obj can be created without binding
-			// so that fields and setters can be bind to obj directly without
-			// temp var
+			append(lines, PARENTESIAPERTA);
 		} else {
 			for (Binding parameter : desc.ctor.parameters) {
 				appendVarDef(lines, parameter);
@@ -104,8 +187,7 @@ class CodegenImplObjectStrict {
 			} else {
 				append(lines, "return {{newInst}};");
 			}
-			
-			append(lines, parentesiChiusa);
+			append(lines, PARENTESICHIUSA);
 			for (Binding field : desc.fields) {
 				appendVarDef(lines, field);
 			}
@@ -118,7 +200,6 @@ class CodegenImplObjectStrict {
 				appendVarDef(lines, param);
 			}
 		}
-		// === bind first field
 		if (desc.onExtraProperties != null || !desc.keyValueTypeWrappers.isEmpty()) {
 			append(lines, "java.util.Map extra = null;");
 		}
@@ -127,52 +208,15 @@ class CodegenImplObjectStrict {
 		append(lines, "while (once) {");
 		append(lines, "once = false;");
 		String rendered = renderTriTree(trieTree);
-		if (desc.ctor.parameters.isEmpty()) {
-			// if not field or setter, the value will set to temp variable
-			for (Binding field : desc.fields) {
-				rendered = updateBindingSetOp(rendered, field);
-			}
-			for (Binding setter : desc.setters) {
-				rendered = updateBindingSetOp(rendered, setter);
-			}
-		}
-		if (hasAnythingToBindFrom(allBindings)) {
-			append(lines, "switch (field.len()) {");
-			append(lines, rendered);
-			append(lines, parentesiChiusa); // end of switch
-		}
-		appendOnUnknownField(lines, desc);
-		append(lines, parentesiChiusa); // end of while
-		// === bind all fields
-		append(lines, "while (com.jsoniter.CodegenAccess.nextToken(iter) == ',') {");
-		append(lines, "field = com.jsoniter.CodegenAccess.readObjectFieldAsSlice(iter);");
-		if (hasAnythingToBindFrom(allBindings)) {
-			append(lines, "switch (field.len()) {");
-			append(lines, rendered);
-			append(lines, parentesiChiusa); // end of switch
-		}
-		appendOnUnknownField(lines, desc);
-		append(lines, parentesiChiusa); // end of while
-		if (hasRequiredBinding) {
-			append(lines, "if (tracker != " + expectedTracker + "L) {");
-			appendMissingRequiredProperties(lines, desc);
-			append(lines, parentesiChiusa);
-		}
+		rendered = primo(desc, rendered); // prima modifica Follow the limit for number of statements in a method
+		lines = multipleAppend(allBindings, desc, lines, rendered, hasRequiredBinding, expectedTracker);
 		if (desc.onExtraProperties != null) {
 			appendSetExtraProperteis(lines, desc);
 		}
 		if (!desc.keyValueTypeWrappers.isEmpty()) {
 			appendSetExtraToKeyValueTypeWrappers(lines, desc);
 		}
-		if (!desc.ctor.parameters.isEmpty()) {
-			append(lines, String.format("%s obj = {{newInst}};", CodegenImplNative.getTypeName(desc.clazz)));
-			for (Binding field : desc.fields) {
-				append(lines, String.format("obj.%s = _%s_;", field.field.getName(), field.name));
-			}
-			for (Binding setter : desc.setters) {
-				append(lines, String.format("obj.%s(_%s_);", setter.method.getName(), setter.name));
-			}
-		}
+		lines = secondo (desc, lines);
 		appendWrappers(desc.bindingTypeWrappers, lines);
 		append(lines, "return obj;");
 		return lines.toString().replace("{{clazz}}", desc.clazz.getCanonicalName()).replace("{{newInst}}",
@@ -188,7 +232,7 @@ class CodegenImplObjectStrict {
 			append(lines, "com.jsoniter.any.Any value = (com.jsoniter.any.Any)entry.getValue();");
 			append(lines, String.format("obj.%s(key, value.object());", wrapper.getName()));
 		}
-		append(lines, parentesiChiusa);
+		append(lines, PARENTESICHIUSA);
 	}
 
 	private static void appendSetExtraProperteis(StringBuilder lines, ClassDescriptor desc) {
@@ -418,7 +462,7 @@ class CodegenImplObjectStrict {
 						append(lines, "continue;");
 					}
 
-					append(lines, parentesiChiusa);
+					append(lines, PARENTESICHIUSA);
 					continue;
 				}
 				Map<Byte, Object> next = null;
@@ -442,7 +486,7 @@ class CodegenImplObjectStrict {
 				append(lines, String.format("field.at(%d)==%s", i, b));
 				append(lines, ") {");
 				addFieldDispatch(lines, len, i + 1, next, new ArrayList<Byte>());
-				append(lines, parentesiChiusa);
+				append(lines, PARENTESICHIUSA);
 			}
 		} catch (Exception e) {
 			e.getMessage();
