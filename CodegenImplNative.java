@@ -1,8 +1,5 @@
 package com.jsoniter;
 
-import com.jsoniter.any.Any;
-import com.jsoniter.spi.*;
-
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -12,6 +9,13 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.jsoniter.any.Any;
+import com.jsoniter.spi.Binding;
+import com.jsoniter.spi.Decoder;
+import com.jsoniter.spi.JsonException;
+import com.jsoniter.spi.JsoniterSpi;
+import com.jsoniter.spi.TypeLiteral;
+
 /**
  * class CodegenImplNative
  * 
@@ -19,14 +23,44 @@ import java.util.Map;
  *
  */
 class CodegenImplNative {
+	/**
+	 * String "decoder for "
+	 */
+	static final String DECODEFOR = "decoder for ";
+	/**
+	 * String "null3"
+	 */
+	static final String NULL3 = "null3";
 
-	static final String decodeFor = "decoder for ";
-	
+	/**
+	 * String "null4"
+	 */
+	static final String NULL4 = "null4";
+	/**
+	 * Err1
+	 */
+	static final String ERR1 = "err1";
+	/**
+	 * Err2
+	 */
+	static final String ERR2 = "err2";
+	/**
+	 * Err3
+	 */
+	static final String ERR3 = "err3";
+	/**
+	 * Err4
+	 */
+	static final String ERR4 = "err4";
+
+	/**
+	 * default private constructor
+	 */
 	private CodegenImplNative() {
 	}
 
 	/**
-	 * 
+	 * NATIVE_READS = HashMap<String, String>()
 	 */
 	final static Map<String, String> NATIVE_READS = new HashMap<String, String>() {
 		{
@@ -55,14 +89,14 @@ class CodegenImplNative {
 		}
 	};
 	/**
-	 * 
+	 * NATIVE_DECODERS = HashMap<Class, Decoder>()
 	 */
 	final static Map<Class, Decoder> NATIVE_DECODERS = new HashMap<Class, Decoder>() {
 		{
 			put(float.class, new Decoder() {
 				@Override
 				public Object decode(JsonIterator iter) throws IOException {
-					return iter.readFloat();
+					return iter.readNull() ? null : iter.readFloat();
 				}
 			});
 			put(Float.class, new Decoder() {
@@ -74,7 +108,7 @@ class CodegenImplNative {
 			put(double.class, new Decoder() {
 				@Override
 				public Object decode(JsonIterator iter) throws IOException {
-					return iter.readDouble();
+					return iter.readNull() ? null : iter.readDouble();
 				}
 			});
 			put(Double.class, new Decoder() {
@@ -199,6 +233,11 @@ class CodegenImplNative {
 		return String.format("(%s)%s", getTypeName(type), genReadOp(cacheKey, type));
 	}
 
+	/**
+	 * 
+	 * @param fieldType
+	 * @return
+	 */
 	public static String getTypeName(Type fieldType) {
 		if (fieldType instanceof Class) {
 			Class clazz = (Class) fieldType;
@@ -229,82 +268,133 @@ class CodegenImplNative {
 
 	}
 
+	/**
+	 * 
+	 * @param d
+	 * @param t1
+	 * @param t2
+	 * @param t
+	 * @return
+	 */
+	private static String limitStatements(Decoder d, boolean t1, boolean t2, Class t) {
+		String s = "null1";
+		if (d == null && t1) {
+			Class clazz = t;
+			String nativeRead = NATIVE_READS.get(clazz.getCanonicalName());
+			if (nativeRead != null) {
+				s = nativeRead;
+			}
+		} else if (t2) {
+			s = NATIVE_READS.get(Object.class.getCanonicalName());
+		}
+		return s;
+	}
+
+	/**
+	 * 
+	 * @param cK
+	 * @return
+	 */
+	private static String limitStatements2(String cK) {
+		String s2 = "null2";
+		if (Codegen.canStaticAccess(cK)) {
+			s2 = String.format("%s.decode_(iter)", cK);
+		} else {
+			// can not use static "decode_" method to access, go through
+			// codegen cache
+			s2 = String.format("com.jsoniter.CodegenAccess.read(\"%s\", iter)", cK);
+		}
+		return s2;
+	}
+
+	/**
+	 * 
+	 * @param err
+	 * @param toReturn
+	 * @param cacheKey
+	 * @param print
+	 */
+	private static void limitStatement3If(String err, String toReturn, String cacheKey, String print) {
+		if (err.equals(toReturn)) {
+			throw new JsonException(DECODEFOR + cacheKey + print);
+		}
+	}
+
+	/**
+	 * 
+	 * @param vT
+	 * @param d
+	 * @param cK
+	 * @return
+	 */
+	private static String limitStatements4(Type vT, Decoder d, String cK) {
+		String s = (vT == int.class) ? (d instanceof Decoder.IntDecoder) == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK) : NULL4;
+		String err = "must implement Decoder.IntDecoder";
+		limitStatement3If(ERR1,s,cK, err);
+		if (vT == long.class) {
+			s = limitStatements5(d, s, cK, err);
+		}
+		err = "must implement Decoder.LongDecoder";
+		s = (vT == float.class) ? (d instanceof Decoder.FloatDecoder) == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readFloat(\"%s\", iter)", cK) : NULL4;
+		err = "must implement Decoder.FloatDecoder";
+		limitStatement3If(ERR3,s,cK, err);
+		s = (vT == double.class) ? (d instanceof Decoder.DoubleDecoder) == false ? ERR4 : String.format("com.jsoniter.CodegenAccess.readDouble(\"%s\", iter)", cK) : NULL4;
+		err = "must implement Decoder.DoubleDecoder";
+		limitStatement3If(ERR4,s,cK, err);	
+		return s;
+	}
+	/**
+	 * 
+	 * @param d
+	 * @param s
+	 * @param cK
+	 * @param err
+	 * @return
+	 */
+	private static String limitStatements5(Decoder d, String s, String cK, String err) {
+		String toRet = "void";
+			if ((d instanceof Decoder.LongDecoder) == false) {
+				limitStatement3If(ERR2, s, cK, err);
+			}
+			toRet = String.format("com.jsoniter.CodegenAccess.readLong(\"%s\", iter)", cK);
+		return toRet;
+	}
+
+	/**
+	 * 
+	 * @param cacheKey
+	 * @param valueType
+	 * @return
+	 */
 	private static String genReadOp(String cacheKey, Type valueType) {
 		// the field decoder might be registered directly
 		Decoder decoder = JsoniterSpi.getDecoder(cacheKey);
+		String toReturn1 = "null1";
+		String toReturn2 = "null2";
 		if (decoder == null) {
 			// if cache key is for field, and there is no field decoder
 			// specified
 			// update cache key for normal type
 			cacheKey = TypeLiteral.create(valueType).getDecoderCacheKey();
 			decoder = JsoniterSpi.getDecoder(cacheKey);
-			if (decoder == null && valueType instanceof Class) {
-				Class clazz = (Class) valueType;
-				String nativeRead = NATIVE_READS.get(clazz.getCanonicalName());
-				if (nativeRead != null) {
-					return nativeRead;
-				}
-			} else if (valueType instanceof WildcardType) {
-				return NATIVE_READS.get(Object.class.getCanonicalName());
+			boolean b1 = valueType instanceof Class;
+			boolean b2 = valueType instanceof WildcardType;
+			if(valueType instanceof Class) {
+				toReturn1 = limitStatements(decoder, b1, b2, (Class) valueType);
 			}
-			Codegen.getDecoder(cacheKey, valueType);
-			if (Codegen.canStaticAccess(cacheKey)) {
-				return String.format("%s.decode_(iter)", cacheKey);
-			} else {
-				// can not use static "decode_" method to access, go through
-				// codegen cache
-				return String.format("com.jsoniter.CodegenAccess.read(\"%s\", iter)", cacheKey);
-			}
+			toReturn2 = limitStatements2(cacheKey);
 		}
-
-		if (valueType == boolean.class) {
-			if ((decoder instanceof Decoder.BooleanDecoder) == false) {
-				throw new JsonException(decodeFor + cacheKey + "must implement Decoder.BooleanDecoder");
-			}
-			return String.format("com.jsoniter.CodegenAccess.readBoolean(\"%s\", iter)", cacheKey);
-		}
-		if (valueType == byte.class) {
-			if ((decoder instanceof Decoder.ShortDecoder) == false) {
-				throw new JsonException(decodeFor + cacheKey + "must implement Decoder.ShortDecoder");
-			}
-			return String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cacheKey);
-		}
-		if (valueType == short.class) {
-			if ((decoder instanceof Decoder.ShortDecoder) == false) {
-				throw new JsonException(decodeFor + cacheKey + "must implement Decoder.ShortDecoder");
-			}
-			return String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cacheKey);
-		}
-		if (valueType == char.class) {
-			if ((decoder instanceof Decoder.IntDecoder) == false) {
-				throw new JsonException(decodeFor + cacheKey + "must implement Decoder.IntDecoder");
-			}
-			return String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cacheKey);
-		}
-		if (valueType == int.class) {
-			if ((decoder instanceof Decoder.IntDecoder) == false) {
-				throw new JsonException(decodeFor + cacheKey + "must implement Decoder.IntDecoder");
-			}
-			return String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cacheKey);
-		}
-		if (valueType == long.class) {
-			if ((decoder instanceof Decoder.LongDecoder) == false) {
-				throw new JsonException(decodeFor + cacheKey + "must implement Decoder.LongDecoder");
-			}
-			return String.format("com.jsoniter.CodegenAccess.readLong(\"%s\", iter)", cacheKey);
-		}
-		if (valueType == float.class) {
-			if ((decoder instanceof Decoder.FloatDecoder) == false) {
-				throw new JsonException(decodeFor + cacheKey + "must implement Decoder.FloatDecoder");
-			}
-			return String.format("com.jsoniter.CodegenAccess.readFloat(\"%s\", iter)", cacheKey);
-		}
-		if (valueType == double.class) {
-			if ((decoder instanceof Decoder.DoubleDecoder) == false) {
-				throw new JsonException(decodeFor + cacheKey + "must implement Decoder.DoubleDecoder");
-			}
-			return String.format("com.jsoniter.CodegenAccess.readDouble(\"%s\", iter)", cacheKey);
-		}
-		return String.format("com.jsoniter.CodegenAccess.read(\"%s\", iter)", cacheKey);
+		String toReturn3 = (valueType == boolean.class) ? (decoder instanceof Decoder.BooleanDecoder) == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readBoolean(\"%s\", iter)", cacheKey) : NULL3;
+		String err = "must implement Decoder.BooleanDecoder";
+		limitStatement3If(ERR1,toReturn3,cacheKey, err);
+		toReturn3 = (valueType == byte.class) ? (decoder instanceof Decoder.ShortDecoder) == false ? ERR2 : String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cacheKey) : NULL3;	
+		err =  "must implement Decoder.ShortDecoder";
+		limitStatement3If(ERR2,toReturn3,cacheKey, err);
+		toReturn3 = (valueType == short.class) ? (decoder instanceof Decoder.ShortDecoder) == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cacheKey) : NULL3;
+		limitStatement3If(ERR3,toReturn3,cacheKey, err);
+		toReturn3 = (valueType == char.class) ? (decoder instanceof Decoder.IntDecoder) == false ? ERR4 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cacheKey) : NULL3;
+		err =  "must implement Decoder.IntDecoder";
+		limitStatement3If(ERR4,toReturn3,cacheKey, err);
+		return "null1".equals(toReturn1) ? "null2".equals(toReturn2) ? "null3".equals(toReturn3) ? "null4".equals(limitStatements4(valueType, decoder, cacheKey)) ? String.format("com.jsoniter.CodegenAccess.read(\"%s\", iter)", cacheKey) : limitStatements4(valueType, decoder, cacheKey) : toReturn3 : toReturn2 : toReturn1;
 	}
 }
