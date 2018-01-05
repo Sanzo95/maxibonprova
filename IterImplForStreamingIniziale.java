@@ -233,6 +233,7 @@ class IterImplForStreaming {
 			iter.head = end;
 			return iter.reusableSlice;
 		}
+		// TODO: avoid small memory allocation
 		byte[] part1 = new byte[iter.tail - iter.head];
 		System.arraycopy(iter.buf, iter.head, part1, 0, part1.length);
 		byte[] part2 = null;
@@ -263,13 +264,10 @@ class IterImplForStreaming {
 				byte c = iter.buf[i];
 				switch (c) {
 				case ' ':
-					break;
 				case '\n':
-					break;
 				case '\t':
-					break;
 				case '\r':
-					break;
+					continue;
 				default:
 					iter.head = i + 1;
 					return c;
@@ -340,6 +338,7 @@ class IterImplForStreaming {
 	}
 
 	public static Any readAny(JsonIterator iter) throws IOException {
+		// TODO: avoid small memory allocation
 		iter.skipStartedAt = iter.head;
 		byte c = nextToken(iter);
 		int n1 = 3;
@@ -440,9 +439,7 @@ class IterImplForStreaming {
 					bc = '\r';
 					break;
 				case '"':
-					break;
 				case '/':
-					break;
 				case '\\':
 					break;
 				case 'u':
@@ -450,20 +447,20 @@ class IterImplForStreaming {
 							+ (IterImplString.translateHex(readByte(iter)) << 8)
 							+ (IterImplString.translateHex(readByte(iter)) << 4)
 							+ IterImplString.translateHex(readByte(iter));
-					boolean bH = Character.isHighSurrogate((char) bc);
-					boolean bL = Character.isLowSurrogate((char) bc);
-					boolean b1 = (isExpectingLowSurrogate && bH);
-					boolean b2 = (!isExpectingLowSurrogate && bL);
-					if (b1 || b2) {
+
+					if ((isExpectingLowSurrogate && Character.isHighSurrogate((char) bc))
+							|| (!isExpectingLowSurrogate && Character.isLowSurrogate((char) bc))) {
 						throw new JsonException("invalid surrogate");
-					} else if (!isExpectingLowSurrogate && bH) {
+					} else if (!isExpectingLowSurrogate && Character.isHighSurrogate((char) bc)) {
 						isExpectingLowSurrogate = true;
-					} else if (isExpectingLowSurrogate && bL) {
+					} else if (isExpectingLowSurrogate && Character.isLowSurrogate((char) bc)) {
 						isExpectingLowSurrogate = false;
 					} else {
 						throw new JsonException("invalid surrogate");
 					}
+
 					break;
+
 				default:
 					throw iter.reportError("readStringSlowPath", "invalid escape character: " + bc);
 				}
@@ -492,7 +489,7 @@ class IterImplForStreaming {
 					f = 0xF0;
 					Map<JsonIterator, Integer> support = new TreeMap<JsonIterator, Integer>();
 					support = iterImplStreamingSupport(iter, f, bc, u2, u3, j);
-					for (JsonIterator je : support.keySet()) {
+					for (JsonIterator je: support.keySet()){
 						iter = je;
 					}
 					bc = support.get(iter);
@@ -506,27 +503,26 @@ class IterImplForStreaming {
 			iter.reusableChars[j++] = Integer.toString(bc).charAt(0);
 		}
 	}
-
-	private static Map<JsonIterator, Integer> iterImplStreamingSupport(JsonIterator iter, long f, int bc, int u2,
-			int u3, int j) throws IOException {
+	
+	private static Map<JsonIterator, Integer> iterImplStreamingSupport(JsonIterator iter, long f, int bc, int u2, int u3, int j) throws IOException{
 		Map<JsonIterator, Integer> support = new TreeMap<JsonIterator, Integer>();
 		if ((Integer
-				.getInteger(
-						Long.toString(SupportBitwise.bitwise(Long.valueOf(Integer.toString(bc)).longValue(), f, '&')))
+				.getInteger(Long.toString(
+						SupportBitwise.bitwise(Long.valueOf(Integer.toString(bc)).longValue(), f, '&')))
 				.intValue()) == 0xE0) {
 			long l1 = 0x0F;
 			long l2 = 0x3F;
 			bc = ((Integer
-					.getInteger(Long
-							.toString(SupportBitwise.bitwise(Long.valueOf(Integer.toString(bc)).longValue(), l1, '&')))
+					.getInteger(Long.toString(SupportBitwise
+							.bitwise(Long.valueOf(Integer.toString(bc)).longValue(), l1, '&')))
 					.intValue()) << 12)
 					+ ((Integer
-							.getInteger(Long.toString(
-									SupportBitwise.bitwise(Long.valueOf(Integer.toString(u2)).longValue(), l2, '&')))
+							.getInteger(Long.toString(SupportBitwise
+									.bitwise(Long.valueOf(Integer.toString(u2)).longValue(), l2, '&')))
 							.intValue()) << 6)
 					+ (Integer
-							.getInteger(Long.toString(
-									SupportBitwise.bitwise(Long.valueOf(Integer.toString(u3)).longValue(), l2, '&')))
+							.getInteger(Long.toString(SupportBitwise
+									.bitwise(Long.valueOf(Integer.toString(u3)).longValue(), l2, '&')))
 							.intValue());
 			support.put(iter, bc);
 			return support;
@@ -555,8 +551,8 @@ class IterImplForStreaming {
 				}
 				f = 0x3ff;
 				Integer b = (Integer
-						.getInteger(Long.toString(
-								SupportBitwise.bitwise(Long.valueOf(Integer.toString(sup)).longValue(), f, '&')))
+						.getInteger(Long.toString(SupportBitwise
+								.bitwise(Long.valueOf(Integer.toString(sup)).longValue(), f, '&')))
 						.intValue() + 0xdc00);
 
 				iter.reusableChars[j++] = b.toString().toCharArray()[0];
@@ -577,8 +573,13 @@ class IterImplForStreaming {
 			long l2 = 0x3F;
 			long l3 = 0x3F;
 			bc = ((Integer
-					.getInteger(Long
-							.toString(SupportBitwise.bitwise(Long.valueOf(Integer.toString(bc)).longValue(), l1, '&')))
+					.getInteger(
+							Long.toString(
+									SupportBitwise
+											.bitwise(
+													Long.valueOf(Integer.toString(bc))
+															.longValue(),
+													l1, '&')))
 					.intValue()) << 18)
 					+ ((Integer
 							.getInteger(Long.toString(
@@ -675,47 +676,19 @@ class IterImplForStreaming {
 				byte c = iter.buf[i];
 				switch (c) {
 				case '-':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '+':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '.':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case 'e':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case 'E':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '0':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '1':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '2':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '3':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '4':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '5':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '6':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '7':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '8':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '9':
 					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
 					break;

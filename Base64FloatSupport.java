@@ -198,7 +198,6 @@ public class Base64FloatSupport {
 	 * enableEncodersAndDecoders
 	 * 
 	 * @throws JsonException
-	 * @throws IOException
 	 */
 	public static void enableEncodersAndDecoders() throws JsonException{
 		boolean enabled = false;
