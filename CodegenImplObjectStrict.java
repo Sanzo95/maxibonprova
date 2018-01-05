@@ -34,27 +34,34 @@ class CodegenImplObjectStrict {
 	/**
 	 * }
 	 */
-	static final String PARENTESICHIUSA = "}";
+	private static final String PARENTESICHIUSA = "}";
+
 	/**
 	 * {
 	 */
-	static final String PARENTESIAPERTA = "{";
+	private static final String PARENTESIAPERTA = "{";
+
 	/**
 	 * 0
 	 */
-	static final String ZERO = "0";
+	private static final String ZERO = "0";
+
 	/**
 	 * 128
 	 */
 	private final static int SBSIZE = 128;
+
 	/**
 	 * "throw new com.jsoniter.spi.JsonException('extra property: %s');"
 	 */
 	static final String QUARTO = "throw new com.jsoniter.spi.JsonException('extra property: %s');";
+
 	/**
-	 * %scom.jsoniter.CodegenAccess.setExistingObject(iter, obj.%s);obj.%s=%s%s 
+	 * %scom.jsoniter.CodegenAccess.setExistingObject(iter, obj.%s);obj.%s=%s%s
 	 */
-	static final String QUINTO= "%scom.jsoniter.CodegenAccess.setExistingObject(iter, obj.%s);obj.%s=%s%s";
+	static final String QUINTO = "%scom.jsoniter.CodegenAccess.setExistingObject(iter, obj.%s);obj.%s=%s%s";
+
+	@SuppressWarnings("serial")
 	/**
 	 * static Map<String, String> DEFAULT_VALUES
 	 */
@@ -120,6 +127,7 @@ class CodegenImplObjectStrict {
 
 	/**
 	 * 24 LINES OF CODE
+	 * 
 	 * @param allBindings
 	 * @param desc
 	 * @param lines
@@ -158,6 +166,7 @@ class CodegenImplObjectStrict {
 
 	/**
 	 * 19 LOC
+	 * 
 	 * @param desc
 	 * @param lines
 	 * @param b
@@ -186,6 +195,7 @@ class CodegenImplObjectStrict {
 
 	/**
 	 * 23 LOC
+	 * 
 	 * @param bin
 	 * @param cD
 	 * @param s
@@ -194,7 +204,8 @@ class CodegenImplObjectStrict {
 	 * @param m
 	 * @return
 	 */
-	private static StringBuilder terzo(List<Binding> bin, ClassDescriptor cD, StringBuilder s, boolean b, long l, Map<Integer, Object> m) {
+	private static StringBuilder terzo(List<Binding> bin, ClassDescriptor cD, StringBuilder s, boolean b, long l,
+			Map<Integer, Object> m) {
 		StringBuilder toReturn = s;
 		for (WrapperDescriptor wrapper : cD.bindingTypeWrappers) {
 			for (Binding param : wrapper.parameters) {
@@ -221,8 +232,8 @@ class CodegenImplObjectStrict {
 	}
 
 	/**
-	 * genObjectUsingStrict
-	 * 25 LOC
+	 * genObjectUsingStrict 25 LOC
+	 * 
 	 * @param desc
 	 * @return
 	 */
@@ -251,7 +262,7 @@ class CodegenImplObjectStrict {
 			lines = multipleAppend2(desc, lines, hasRequiredBinding);
 		}
 		lines = terzo(allBindings, desc, lines, hasRequiredBinding, expectedTracker, trieTree);
-		return lines.toString().replace("{{clazz}}", desc.clazz.getCanonicalName()).replace("{{newInst}}", CodegenImplObjectHash.genNewInstCode(desc.clazz, desc.ctor));
+		return lines.toString().replace("{{clazz}}", desc.clazz.getCanonicalName()).replace("{{newInst}}",CodegenImplObjectHash.genNewInstCode(desc.clazz, desc.ctor));
 	}
 
 	/**
@@ -325,6 +336,14 @@ class CodegenImplObjectStrict {
 		return requiredIdx;
 	}
 
+	/**
+	 * 
+	 * @param rendered
+	 * @param binding
+	 * @param marker
+	 * @param start
+	 * @return
+	 */
 	private static String quinto(String rendered, Binding binding, String marker, int start) {
 		int middle = rendered.indexOf('=', start);
 		if (middle == -1) {
@@ -339,14 +358,17 @@ class CodegenImplObjectStrict {
 		if (binding.field != null) {
 			if (binding.valueCanReuse) {
 				// reuse; then field set
-				return String.format(QUINTO, rendered.substring(0, start), binding.field.getName(), binding.field.getName(), op, rendered.substring(end));
+				return String.format(QUINTO, rendered.substring(0, start), binding.field.getName(),
+						binding.field.getName(), op, rendered.substring(end));
 			} else {
 				// just field set
-				return String.format("%sobj.%s=%s%s", rendered.substring(0, start), binding.field.getName(), op, rendered.substring(end));
+				return String.format("%sobj.%s=%s%s", rendered.substring(0, start), binding.field.getName(), op,
+						rendered.substring(end));
 			}
 		} else {
 			// method set
-			return String.format("%sobj.%s(%s)%s", rendered.substring(0, start), binding.method.getName(), op, rendered.substring(end));
+			return String.format("%sobj.%s(%s)%s", rendered.substring(0, start), binding.method.getName(), op,
+					rendered.substring(end));
 		}
 	}
 
@@ -387,7 +409,10 @@ class CodegenImplObjectStrict {
 		for (Binding binding : desc.allDecoderBindings()) {
 			if (binding.asMissingWhenNotPresent) {
 				long mask = binding.mask;
-				append(lines, String.format("com.jsoniter.CodegenAccess.addMissingField(missingFields, tracker, %sL, \"%s\");", mask, binding.name));
+				append(lines,
+						String.format(
+								"com.jsoniter.CodegenAccess.addMissingField(missingFields, tracker, %sL, \"%s\");",
+								mask, binding.name));
 			}
 		}
 		if (desc.onMissingProperties == null || !desc.ctor.parameters.isEmpty()) {
@@ -401,6 +426,7 @@ class CodegenImplObjectStrict {
 			}
 		}
 	}
+
 	/**
 	 * 
 	 * @param lines
@@ -408,7 +434,8 @@ class CodegenImplObjectStrict {
 	 */
 	private static void appendOnUnknownField(StringBuilder lines, ClassDescriptor desc) {
 		if (desc.asExtraForUnknownProperties && desc.onExtraProperties == null) {
-			append(lines, "throw new com.jsoniter.spi.JsonException('extra property: ' + field.toString());".replace('\'', '"'));
+			append(lines, "throw new com.jsoniter.spi.JsonException('extra property: ' + field.toString());"
+					.replace('\'', '"'));
 		} else {
 			if (desc.asExtraForUnknownProperties || !desc.keyValueTypeWrappers.isEmpty()) {
 				append(lines, "if (extra == null) { extra = new java.util.HashMap(); }");
@@ -469,6 +496,7 @@ class CodegenImplObjectStrict {
 		return newMap;
 	}
 
+	@SuppressWarnings("unchecked")
 	/**
 	 * 
 	 * @param trieTree
@@ -516,9 +544,22 @@ class CodegenImplObjectStrict {
 		if (field.asMissingWhenNotPresent && support) {
 			append(toReturn, "tracker = tracker | " + field.mask + "L;");
 		}
-		if (support)
-			append(toReturn, "continue;");
+		toReturn = quartoSupport(support, toReturn);
 		return toReturn;
+	}
+
+	/**
+	 * 
+	 * @param support
+	 * @param toReturn
+	 * @return
+	 */
+	private static StringBuilder quartoSupport(boolean support, StringBuilder toReturn) {
+		StringBuilder temp = toReturn;
+		if (support) {
+			append(temp, "continue;");
+		}
+		return temp;
 	}
 
 	/**
@@ -576,6 +617,7 @@ class CodegenImplObjectStrict {
 		return toReturn;
 	}
 
+	@SuppressWarnings("unchecked")
 	/**
 	 * 
 	 * @param lines
@@ -586,7 +628,6 @@ class CodegenImplObjectStrict {
 	 */
 	private static void addFieldDispatch(StringBuilder lines, int len, int i, Map<Byte, Object> current,
 			List<Byte> bytesToCompare) {
-		int size = 0;
 		Set<Entry<Byte, Object>> setSize = current.entrySet();
 		List<Byte> nextBytesToCompare = null;
 		for (Map.Entry<Byte, Object> entry : setSize) {
@@ -606,6 +647,7 @@ class CodegenImplObjectStrict {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	/**
 	 * 
 	 * @param clazz
