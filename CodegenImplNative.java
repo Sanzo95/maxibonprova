@@ -271,18 +271,20 @@ class CodegenImplNative {
 	/**
 	 * 
 	 * @param d
+	 * @param t1
+	 * @param t2
 	 * @param t
 	 * @return
 	 */
-	private static String limitStatements(Decoder d, Type t) {
+	private static String limitStatements(Decoder d, boolean t1, boolean t2, Class t) {
 		String s = "null1";
-		if (d == null && t instanceof Class) {
-			Class clazz = (Class) t;
+		if (d == null && t1) {
+			Class clazz = t;
 			String nativeRead = NATIVE_READS.get(clazz.getCanonicalName());
 			if (nativeRead != null) {
 				s = nativeRead;
 			}
-		} else if (t instanceof WildcardType) {
+		} else if (t2) {
 			s = NATIVE_READS.get(Object.class.getCanonicalName());
 		}
 		return s;
@@ -329,7 +331,9 @@ class CodegenImplNative {
 		String s = (vT == int.class) ? (d instanceof Decoder.IntDecoder) == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK) : NULL4;
 		String err = "must implement Decoder.IntDecoder";
 		limitStatement3If(ERR1,s,cK, err);
-		s = limitStatements5(vT, d, s, cK, err);
+		if (vT == long.class) {
+			s = limitStatements5(d, s, cK, err);
+		}
 		err = "must implement Decoder.LongDecoder";
 		s = (vT == float.class) ? (d instanceof Decoder.FloatDecoder) == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readFloat(\"%s\", iter)", cK) : NULL4;
 		err = "must implement Decoder.FloatDecoder";
@@ -339,15 +343,20 @@ class CodegenImplNative {
 		limitStatement3If(ERR4,s,cK, err);	
 		return s;
 	}
-	
-	private static String limitStatements5(Type vT, Decoder d, String s, String cK, String err) {
+	/**
+	 * 
+	 * @param d
+	 * @param s
+	 * @param cK
+	 * @param err
+	 * @return
+	 */
+	private static String limitStatements5(Decoder d, String s, String cK, String err) {
 		String toRet = "void";
-		if (vT == long.class) {
 			if ((d instanceof Decoder.LongDecoder) == false) {
 				limitStatement3If(ERR2, s, cK, err);
 			}
 			toRet = String.format("com.jsoniter.CodegenAccess.readLong(\"%s\", iter)", cK);
-		}
 		return toRet;
 	}
 
@@ -368,7 +377,11 @@ class CodegenImplNative {
 			// update cache key for normal type
 			cacheKey = TypeLiteral.create(valueType).getDecoderCacheKey();
 			decoder = JsoniterSpi.getDecoder(cacheKey);
-			toReturn1 = limitStatements(decoder, valueType);
+			boolean b1 = valueType instanceof Class;
+			boolean b2 = valueType instanceof WildcardType;
+			if(valueType instanceof Class) {
+				toReturn1 = limitStatements(decoder, b1, b2, (Class) valueType);
+			}
 			toReturn2 = limitStatements2(cacheKey);
 		}
 		String toReturn3 = (valueType == boolean.class) ? (decoder instanceof Decoder.BooleanDecoder) == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readBoolean(\"%s\", iter)", cacheKey) : NULL3;
