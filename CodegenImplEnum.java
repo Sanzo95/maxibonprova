@@ -160,8 +160,7 @@ class CodegenImplEnum {
 			Byte a = bTC.get(j);
 			append(lines, String.format("field.at(%d)==%s && ", i - bTC.size() + j, a));
 		}
-		append(lines, String.format("field.at(%d)==%s", i, b));
-		append(lines, ") {");
+		append(lines, String.format("field.at(%d)==%s", i, b) + ") {");
 		addFieldDispatch(lines, len, i + 1, next, new ArrayList<Byte>());
 		append(lines, "}");
 	}
