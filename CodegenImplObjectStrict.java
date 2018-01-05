@@ -262,7 +262,8 @@ class CodegenImplObjectStrict {
 			lines = multipleAppend2(desc, lines, hasRequiredBinding);
 		}
 		lines = terzo(allBindings, desc, lines, hasRequiredBinding, expectedTracker, trieTree);
-		return lines.toString().replace("{{clazz}}", desc.clazz.getCanonicalName()).replace("{{newInst}}",CodegenImplObjectHash.genNewInstCode(desc.clazz, desc.ctor));
+		return lines.toString().replace("{{clazz}}", desc.clazz.getCanonicalName()).replace("{{newInst}}",
+				CodegenImplObjectHash.genNewInstCode(desc.clazz, desc.ctor));
 	}
 
 	/**
@@ -344,7 +345,8 @@ class CodegenImplObjectStrict {
 	 * @param start
 	 * @return
 	 */
-	private static String quinto(String rendered, Binding binding, String marker, int start) {
+	private static String quinto(String rendered, Binding binding, int start) {
+		String toReturn = "";
 		int middle = rendered.indexOf('=', start);
 		if (middle == -1) {
 			throw new JsonException("can not find = in: " + rendered + " ,at " + start);
@@ -358,18 +360,19 @@ class CodegenImplObjectStrict {
 		if (binding.field != null) {
 			if (binding.valueCanReuse) {
 				// reuse; then field set
-				return String.format(QUINTO, rendered.substring(0, start), binding.field.getName(),
+				toReturn = String.format(QUINTO, rendered.substring(0, start), binding.field.getName(),
 						binding.field.getName(), op, rendered.substring(end));
 			} else {
 				// just field set
-				return String.format("%sobj.%s=%s%s", rendered.substring(0, start), binding.field.getName(), op,
+				toReturn = String.format("%sobj.%s=%s%s", rendered.substring(0, start), binding.field.getName(), op,
 						rendered.substring(end));
 			}
 		} else {
 			// method set
-			return String.format("%sobj.%s(%s)%s", rendered.substring(0, start), binding.method.getName(), op,
+			toReturn = String.format("%sobj.%s(%s)%s", rendered.substring(0, start), binding.method.getName(), op,
 					rendered.substring(end));
 		}
+		return toReturn;
 	}
 
 	/**
@@ -394,7 +397,7 @@ class CodegenImplObjectStrict {
 				flag = false;
 				break;
 			}
-			toReturn = quinto(toReturn, binding, marker, start);
+			toReturn = quinto(toReturn, binding, start);
 		}
 		return toReturn;
 	}
