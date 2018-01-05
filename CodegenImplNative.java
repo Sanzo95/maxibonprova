@@ -36,6 +36,22 @@ class CodegenImplNative {
 	 * String "null4"
 	 */
 	static final String NULL4 = "null4";
+	/**
+	 * Err1
+	 */
+	static final String ERR1 = "err1";
+	/**
+	 * Err2
+	 */
+	static final String ERR2 = "err2";
+	/**
+	 * Err3
+	 */
+	static final String ERR3 = "err3";
+	/**
+	 * Err4
+	 */
+	static final String ERR4 = "err4";
 
 	/**
 	 * default private constructor
@@ -44,13 +60,167 @@ class CodegenImplNative {
 	}
 
 	/**
-	 * 
+	 * NATIVE_READS = HashMap<String, String>()
 	 */
-	final static Map<String, String> NATIVE_READS=new HashMap<String,String>(){{put("float","iter.readFloat()");put("double","iter.readDouble()");put("boolean","iter.readBoolean()");put("byte","iter.readShort()");put("short","iter.readShort()");put("int","iter.readInt()");put("char","iter.readInt()");put("long","iter.readLong()");put(Float.class.getName(),"(iter.readNull() ? null : java.lang.Float.valueOf(iter.readFloat()))");put(Double.class.getName(),"(iter.readNull() ? null : java.lang.Double.valueOf(iter.readDouble()))");put(Boolean.class.getName(),"(iter.readNull() ? null : java.lang.Boolean.valueOf(iter.readBoolean()))");put(Byte.class.getName(),"(iter.readNull() ? null : java.lang.Byte.valueOf((byte)iter.readShort()))");put(Character.class.getName(),"(iter.readNull() ? null : java.lang.Character.valueOf((char)iter.readShort()))");put(Short.class.getName(),"(iter.readNull() ? null : java.lang.Short.valueOf(iter.readShort()))");put(Integer.class.getName(),"(iter.readNull() ? null : java.lang.Integer.valueOf(iter.readInt()))");put(Long.class.getName(),"(iter.readNull() ? null : java.lang.Long.valueOf(iter.readLong()))");put(BigDecimal.class.getName(),"iter.readBigDecimal()");put(BigInteger.class.getName(),"iter.readBigInteger()");put(String.class.getName(),"iter.readString()");put(Object.class.getName(),"iter.read()");put(Any.class.getName(),"iter.readAny()");}};
+	final static Map<String, String> NATIVE_READS = new HashMap<String, String>() {
+		{
+			put("float", "iter.readFloat()");
+			put("double", "iter.readDouble()");
+			put("boolean", "iter.readBoolean()");
+			put("byte", "iter.readShort()");
+			put("short", "iter.readShort()");
+			put("int", "iter.readInt()");
+			put("char", "iter.readInt()");
+			put("long", "iter.readLong()");
+			put(Float.class.getName(), "(iter.readNull() ? null : java.lang.Float.valueOf(iter.readFloat()))");
+			put(Double.class.getName(), "(iter.readNull() ? null : java.lang.Double.valueOf(iter.readDouble()))");
+			put(Boolean.class.getName(), "(iter.readNull() ? null : java.lang.Boolean.valueOf(iter.readBoolean()))");
+			put(Byte.class.getName(), "(iter.readNull() ? null : java.lang.Byte.valueOf((byte)iter.readShort()))");
+			put(Character.class.getName(),
+					"(iter.readNull() ? null : java.lang.Character.valueOf((char)iter.readShort()))");
+			put(Short.class.getName(), "(iter.readNull() ? null : java.lang.Short.valueOf(iter.readShort()))");
+			put(Integer.class.getName(), "(iter.readNull() ? null : java.lang.Integer.valueOf(iter.readInt()))");
+			put(Long.class.getName(), "(iter.readNull() ? null : java.lang.Long.valueOf(iter.readLong()))");
+			put(BigDecimal.class.getName(), "iter.readBigDecimal()");
+			put(BigInteger.class.getName(), "iter.readBigInteger()");
+			put(String.class.getName(), "iter.readString()");
+			put(Object.class.getName(), "iter.read()");
+			put(Any.class.getName(), "iter.readAny()");
+		}
+	};
 	/**
-	 * 
+	 * NATIVE_DECODERS = HashMap<Class, Decoder>()
 	 */
-	final static Map<Class, Decoder> NATIVE_DECODERS=new HashMap<Class,Decoder>(){{put(float.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readFloat();}});put(Float.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readNull()?null:iter.readFloat();}});put(double.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readDouble();}});put(Double.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readNull()?null:iter.readDouble();}});put(boolean.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readBoolean();}});put(Boolean.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readNull()?null:iter.readBoolean();}});put(byte.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return Byte.valueOf(Short.toString(iter.readShort()).getBytes()[0]);}});put(Byte.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readNull()?null:Short.toString(iter.readShort()).getBytes()[0];}});put(short.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readShort();}});put(Short.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readNull()?null:iter.readShort();}});put(int.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readInt();}});put(Integer.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readNull()?null:iter.readInt();}});put(char.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return Integer.toString(iter.readInt()).charAt(0);}});put(Character.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readNull()?null:Integer.toString(iter.readInt()).charAt(0);}});put(long.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readLong();}});put(Long.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readNull()?null:iter.readLong();}});put(BigDecimal.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readBigDecimal();}});put(BigInteger.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readBigInteger();}});put(String.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readString();}});put(Object.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.read();}});put(Any.class,new Decoder(){@Override public Object decode(JsonIterator iter)throws IOException{return iter.readAny();}});}};
+	final static Map<Class, Decoder> NATIVE_DECODERS = new HashMap<Class, Decoder>() {
+		{
+			put(float.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readNull() ? null : iter.readFloat();
+				}
+			});
+			put(Float.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readNull() ? null : iter.readFloat();
+				}
+			});
+			put(double.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readNull() ? null : iter.readDouble();
+				}
+			});
+			put(Double.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readNull() ? null : iter.readDouble();
+				}
+			});
+			put(boolean.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readBoolean();
+				}
+			});
+			put(Boolean.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readNull() ? null : iter.readBoolean();
+				}
+			});
+			put(byte.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return Byte.valueOf(Short.toString(iter.readShort()).getBytes()[0]);
+				}
+			});
+			put(Byte.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readNull() ? null : Short.toString(iter.readShort()).getBytes()[0];
+				}
+			});
+			put(short.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readShort();
+				}
+			});
+			put(Short.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readNull() ? null : iter.readShort();
+				}
+			});
+			put(int.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readInt();
+				}
+			});
+			put(Integer.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readNull() ? null : iter.readInt();
+				}
+			});
+			put(char.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return Integer.toString(iter.readInt()).charAt(0);
+				}
+			});
+			put(Character.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readNull() ? null : Integer.toString(iter.readInt()).charAt(0);
+				}
+			});
+			put(long.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readLong();
+				}
+			});
+			put(Long.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readNull() ? null : iter.readLong();
+				}
+			});
+			put(BigDecimal.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readBigDecimal();
+				}
+			});
+			put(BigInteger.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readBigInteger();
+				}
+			});
+			put(String.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readString();
+				}
+			});
+			put(Object.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.read();
+				}
+			});
+			put(Any.class, new Decoder() {
+				@Override
+				public Object decode(JsonIterator iter) throws IOException {
+					return iter.readAny();
+				}
+			});
+		}
+	};
 
 	/**
 	 * genReadOp.
@@ -142,26 +312,32 @@ class CodegenImplNative {
 	 * @param cK
 	 * @return
 	 */
-	private static String limitStatements3(Type vT, Decoder d, String cK) {
-		String s = (vT == int.class) ? (d instanceof Decoder.IntDecoder) == false ? "err1" : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK) : NULL4;
-		if ("err1".equals(s)) {
+	private static String limitStatements4(Type vT, Decoder d, String cK) {
+		String s = (vT == int.class) ? (d instanceof Decoder.IntDecoder) == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK) : NULL4;
+		if (ERR1.equals(s)) {
 			throw new JsonException(DECODEFOR + cK + "must implement Decoder.IntDecoder");
 		}
-		s = (vT == long.class) ? (d instanceof Decoder.LongDecoder) == false ? "err2" : String.format("com.jsoniter.CodegenAccess.readLong(\"%s\", iter)", cK) : NULL4;
-		if ("err2".equals(s)) {
+		s = (vT == long.class) ? (d instanceof Decoder.LongDecoder) == false ? ERR2 : String.format("com.jsoniter.CodegenAccess.readLong(\"%s\", iter)", cK) : NULL4;
+		if (ERR2.equals(s)) {
 			throw new JsonException(DECODEFOR + cK + "must implement Decoder.LongDecoder");
 		}
-		s = (vT == float.class) ? (d instanceof Decoder.FloatDecoder) == false ? "err3" : String.format("com.jsoniter.CodegenAccess.readFloat(\"%s\", iter)", cK) : NULL4;
-		if ("err3".equals(s)) {
+		s = (vT == float.class) ? (d instanceof Decoder.FloatDecoder) == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readFloat(\"%s\", iter)", cK) : NULL4;
+		if (ERR3.equals(s)) {
 			throw new JsonException(DECODEFOR + cK + "must implement Decoder.FloatDecoder");
 		}
-		s = (vT == double.class) ? (d instanceof Decoder.DoubleDecoder) == false ? "err3" : String.format("com.jsoniter.CodegenAccess.readDouble(\"%s\", iter)", cK) : NULL4;
-		if ("err4".equals(s)) {
+		s = (vT == double.class) ? (d instanceof Decoder.DoubleDecoder) == false ? ERR4 : String.format("com.jsoniter.CodegenAccess.readDouble(\"%s\", iter)", cK) : NULL4;
+		if (ERR4.equals(s)) {
 			throw new JsonException(DECODEFOR + cK + "must implement Decoder.DoubleDecoder");
 		}	
 		return s;
 	}
 
+	/**
+	 * 
+	 * @param cacheKey
+	 * @param valueType
+	 * @return
+	 */
 	private static String genReadOp(String cacheKey, Type valueType) {
 		// the field decoder might be registered directly
 		Decoder decoder = JsoniterSpi.getDecoder(cacheKey);
@@ -177,23 +353,23 @@ class CodegenImplNative {
 			toReturn1 = limitStatements(decoder, valueType);
 			toReturn2 = limitStatements2(cacheKeyCopy);
 		}
-		String toReturn3 = (valueType == boolean.class) ? (decoder instanceof Decoder.BooleanDecoder) == false ? "err1" : String.format("com.jsoniter.CodegenAccess.readBoolean(\"%s\", iter)", cacheKeyCopy) : NULL3;
-		if ("err1".equals(toReturn3)) {
+		String toReturn3 = (valueType == boolean.class) ? (decoder instanceof Decoder.BooleanDecoder) == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readBoolean(\"%s\", iter)", cacheKeyCopy) : NULL3;
+		if (ERR1.equals(toReturn3)) {
 			throw new JsonException(DECODEFOR + cacheKeyCopy + "must implement Decoder.BooleanDecoder");
 		}
-		toReturn3 = (valueType == byte.class) ? (decoder instanceof Decoder.ShortDecoder) == false ? "err2" : String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cacheKeyCopy) : NULL3;	
-		if ("err2".equals(toReturn3)) {
+		toReturn3 = (valueType == byte.class) ? (decoder instanceof Decoder.ShortDecoder) == false ? ERR2 : String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cacheKeyCopy) : NULL3;	
+		if (ERR2.equals(toReturn3)) {
 			throw new JsonException(DECODEFOR + cacheKeyCopy + "must implement Decoder.ShortDecoder");
 		}
-		toReturn3 = (valueType == short.class) ? (decoder instanceof Decoder.ShortDecoder) == false ? "err3" : String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cacheKeyCopy) : NULL3;
-		if ("err3".equals(toReturn3)) {
+		toReturn3 = (valueType == short.class) ? (decoder instanceof Decoder.ShortDecoder) == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cacheKeyCopy) : NULL3;
+		if (ERR3.equals(toReturn3)) {
 			throw new JsonException(DECODEFOR + cacheKeyCopy + "must implement Decoder.ShortDecoder");
 		}
-		toReturn3 = (valueType == char.class) ? (decoder instanceof Decoder.IntDecoder) == false ? "err4" : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cacheKeyCopy) : "null3";
-		if ("err4".equals(toReturn3)) {
+		toReturn3 = (valueType == char.class) ? (decoder instanceof Decoder.IntDecoder) == false ? ERR4 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cacheKeyCopy) : NULL3;
+		if (ERR4.equals(toReturn3)) {
 			throw new JsonException(DECODEFOR + cacheKeyCopy + "must implement Decoder.IntDecoder");
 		}
-		String toReturn4 = limitStatements3(valueType, decoder, cacheKeyCopy);
+		String toReturn4 = limitStatements4(valueType, decoder, cacheKeyCopy);
 		String toReturn5 = String.format("com.jsoniter.CodegenAccess.read(\"%s\", iter)", cacheKeyCopy);
 		return "null1".equals(toReturn1) ? "null2".equals(toReturn2) ? "null3".equals(toReturn3) ? "null4".equals(toReturn4) ? toReturn5 : toReturn4 : toReturn3 : toReturn2 : toReturn1;
 	}
