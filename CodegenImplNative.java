@@ -326,21 +326,17 @@ class CodegenImplNative {
 	 */
 	private static String limitStatements4(Type vT, Decoder d, String cK) {
 		String s = (vT == int.class) ? (d instanceof Decoder.IntDecoder) == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK) : NULL4;
-		if (ERR1.equals(s)) {
-			throw new JsonException(DECODEFOR + cK + "must implement Decoder.IntDecoder");
-		}
+		String err = "must implement Decoder.IntDecoder";
+		limitStatement3If(ERR1,s,cK, err);
 		s = (vT == long.class) ? (d instanceof Decoder.LongDecoder) == false ? ERR2 : String.format("com.jsoniter.CodegenAccess.readLong(\"%s\", iter)", cK) : NULL4;
-		if (ERR2.equals(s)) {
-			throw new JsonException(DECODEFOR + cK + "must implement Decoder.LongDecoder");
-		}
+		err = "must implement Decoder.LongDecoder";
+		limitStatement3If(ERR2,s,cK, err);
 		s = (vT == float.class) ? (d instanceof Decoder.FloatDecoder) == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readFloat(\"%s\", iter)", cK) : NULL4;
-		if (ERR3.equals(s)) {
-			throw new JsonException(DECODEFOR + cK + "must implement Decoder.FloatDecoder");
-		}
+		err = "must implement Decoder.FloatDecoder";
+		limitStatement3If(ERR3,s,cK, err);
 		s = (vT == double.class) ? (d instanceof Decoder.DoubleDecoder) == false ? ERR4 : String.format("com.jsoniter.CodegenAccess.readDouble(\"%s\", iter)", cK) : NULL4;
-		if (ERR4.equals(s)) {
-			throw new JsonException(DECODEFOR + cK + "must implement Decoder.DoubleDecoder");
-		}	
+		err = "must implement Decoder.DoubleDecoder";
+		limitStatement3If(ERR4,s,cK, err);	
 		return s;
 	}
 
@@ -371,7 +367,6 @@ class CodegenImplNative {
 		err =  "must implement Decoder.ShortDecoder";
 		limitStatement3If(ERR2,toReturn3,cacheKey, err);
 		toReturn3 = (valueType == short.class) ? (decoder instanceof Decoder.ShortDecoder) == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cacheKey) : NULL3;
-		err ="must implement Decoder.ShortDecoder";
 		limitStatement3If(ERR3,toReturn3,cacheKey, err);
 		toReturn3 = (valueType == char.class) ? (decoder instanceof Decoder.IntDecoder) == false ? ERR4 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cacheKey) : NULL3;
 		err =  "must implement Decoder.IntDecoder";
