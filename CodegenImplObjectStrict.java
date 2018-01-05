@@ -98,15 +98,20 @@ class CodegenImplObjectStrict {
 	 */
 	private static StringBuilder secondo(ClassDescriptor desc, StringBuilder lines) {
 		StringBuilder toReturn = lines;
+		String temp = "";
 		if (!desc.ctor.parameters.isEmpty()) {
-			append(toReturn, String.format("%s obj = {{newInst}};", CodegenImplNative.getTypeName(desc.clazz)));
+			temp = "%s obj = {{newInst}};";
+			append(toReturn, String.format(temp, CodegenImplNative.getTypeName(desc.clazz)));
 			for (Binding field : desc.fields) {
-				append(toReturn, String.format("obj.%s = _%s_;", field.field.getName(), field.name));
+				temp = "obj.%s = _%s_;";
+				append(toReturn, String.format(temp, field.field.getName(), field.name));
 			}
 			for (Binding setter : desc.setters) {
-				append(toReturn, String.format("obj.%s(_%s_);", setter.method.getName(), setter.name));
+				temp = "obj.%s(_%s_);";
+				append(toReturn, String.format(temp, setter.method.getName(), setter.name));
 			}
 		}
+		System.out.print(temp);
 		return toReturn;
 	}
 
@@ -123,6 +128,7 @@ class CodegenImplObjectStrict {
 	private static StringBuilder multipleAppend(List<Binding> allBindings, ClassDescriptor desc, StringBuilder lines,
 			String rendered, boolean hasRequiredBinding, long expectedTracker) {
 		StringBuilder toReturn = lines;
+		append(toReturn, "once = false;");
 		if (hasAnythingToBindFrom(allBindings)) {
 			append(toReturn, "switch (field.len()) {");
 			append(toReturn, rendered);
@@ -151,17 +157,16 @@ class CodegenImplObjectStrict {
 	 * 
 	 * @param desc
 	 * @param lines
-	 * @param hasRequiredBinding
+	 * @param b
 	 * @return
 	 */
-	private static StringBuilder multipleAppend2(ClassDescriptor desc, StringBuilder lines,
-			boolean hasRequiredBinding) {
+	private static StringBuilder multipleAppend2(ClassDescriptor desc, StringBuilder lines, boolean b) {
 		StringBuilder toReturn = lines;
 		for (Binding parameter : desc.ctor.parameters) {
 			appendVarDef(toReturn, parameter);
 		}
 		append(toReturn, "if (!com.jsoniter.CodegenAccess.readObjectStart(iter)) {");
-		if (hasRequiredBinding) {
+		if (b) {
 			appendMissingRequiredProperties(toReturn, desc);
 		} else {
 			append(toReturn, "return {{newInst}};");
@@ -178,45 +183,43 @@ class CodegenImplObjectStrict {
 
 	/**
 	 * 
-	 * @param allBindings
-	 * @param desc
-	 * @param lines
-	 * @param hasRequiredBinding
-	 * @param expectedTracker
-	 * @param trieTree
+	 * @param bin
+	 * @param cD
+	 * @param s
+	 * @param b
+	 * @param l
+	 * @param m
 	 * @return
 	 */
-	private static StringBuilder terzo(List<Binding> allBindings, ClassDescriptor desc, StringBuilder lines,
-			boolean hasRequiredBinding, long expectedTracker, Map<Integer, Object> trieTree) {
-		StringBuilder toReturn = lines;
-		for (WrapperDescriptor wrapper : desc.bindingTypeWrappers) {
+	private static StringBuilder terzo(List<Binding> bin, ClassDescriptor cD, StringBuilder s, boolean b, long l, Map<Integer, Object> m) {
+		StringBuilder toReturn = s;
+		for (WrapperDescriptor wrapper : cD.bindingTypeWrappers) {
 			for (Binding param : wrapper.parameters) {
 				appendVarDef(toReturn, param);
 			}
 		}
-		if (desc.onExtraProperties != null || !desc.keyValueTypeWrappers.isEmpty()) {
+		if (cD.onExtraProperties != null || !cD.keyValueTypeWrappers.isEmpty()) {
 			append(toReturn, "java.util.Map extra = null;");
 		}
 		append(toReturn, "com.jsoniter.spi.Slice field = com.jsoniter.CodegenAccess.readObjectFieldAsSlice(iter);");
 		append(toReturn, "boolean once = true;");
 		append(toReturn, "while (once) {");
-		append(toReturn, "once = false;");
-		toReturn = multipleAppend(allBindings, desc, toReturn, primo(desc, renderTriTree(trieTree)), hasRequiredBinding,
-				expectedTracker);
-		if (desc.onExtraProperties != null) {
-			appendSetExtraProperteis(toReturn, desc);
+		toReturn = multipleAppend(bin, cD, toReturn, primo(cD, renderTriTree(m)), b, l);
+		if (cD.onExtraProperties != null) {
+			appendSetExtraProperteis(toReturn, cD);
 		}
-		if (!desc.keyValueTypeWrappers.isEmpty()) {
-			appendSetExtraToKeyValueTypeWrappers(toReturn, desc);
+		if (!cD.keyValueTypeWrappers.isEmpty()) {
+			appendSetExtraToKeyValueTypeWrappers(toReturn, cD);
 		}
-		toReturn = secondo(desc, toReturn);
-		appendWrappers(desc.bindingTypeWrappers, toReturn);
+		toReturn = secondo(cD, toReturn);
+		appendWrappers(cD.bindingTypeWrappers, toReturn);
 		append(toReturn, "return obj;");
 		return toReturn;
 	}
 
 	/**
 	 * genObjectUsingStrict
+	 * 
 	 * @param desc
 	 * @return
 	 */
@@ -245,10 +248,14 @@ class CodegenImplObjectStrict {
 			lines = multipleAppend2(desc, lines, hasRequiredBinding);
 		}
 		lines = terzo(allBindings, desc, lines, hasRequiredBinding, expectedTracker, trieTree);
-		return lines.toString().replace("{{clazz}}", desc.clazz.getCanonicalName()).replace("{{newInst}}",
-				CodegenImplObjectHash.genNewInstCode(desc.clazz, desc.ctor));
+		return lines.toString().replace("{{clazz}}", desc.clazz.getCanonicalName()).replace("{{newInst}}", CodegenImplObjectHash.genNewInstCode(desc.clazz, desc.ctor));
 	}
 
+	/**
+	 * 
+	 * @param lines
+	 * @param desc
+	 */
 	private static void appendSetExtraToKeyValueTypeWrappers(StringBuilder lines, ClassDescriptor desc) {
 		append(lines, "java.util.Iterator extraIter = extra.entrySet().iterator();");
 		append(lines, "while(extraIter.hasNext()) {");
@@ -261,6 +268,11 @@ class CodegenImplObjectStrict {
 		append(lines, PARENTESICHIUSA);
 	}
 
+	/**
+	 * 
+	 * @param lines
+	 * @param desc
+	 */
 	private static void appendSetExtraProperteis(StringBuilder lines, ClassDescriptor desc) {
 		Binding onExtraProperties = desc.onExtraProperties;
 		if (GenericsHelper.isSameClass(onExtraProperties.valueType, Map.class)) {
@@ -274,6 +286,11 @@ class CodegenImplObjectStrict {
 		throw new JsonException("extra properties can only be Map");
 	}
 
+	/**
+	 * 
+	 * @param allBindings
+	 * @return
+	 */
 	private static boolean hasAnythingToBindFrom(List<Binding> allBindings) {
 		boolean flag = false;
 		for (Binding binding : allBindings) {
@@ -285,6 +302,11 @@ class CodegenImplObjectStrict {
 		return flag;
 	}
 
+	/**
+	 * 
+	 * @param allBindings
+	 * @return
+	 */
 	private static int assignMaskForRequiredProperties(List<Binding> allBindings) {
 		int requiredIdx = 0;
 		for (Binding binding : allBindings) {
@@ -300,6 +322,12 @@ class CodegenImplObjectStrict {
 		return requiredIdx;
 	}
 
+	/**
+	 * 
+	 * @param rendered
+	 * @param binding
+	 * @return
+	 */
 	private static String updateBindingSetOp(String rendered, Binding binding) {
 		if (binding.fromNames.length == 0) {
 			return rendered;
@@ -323,31 +351,29 @@ class CodegenImplObjectStrict {
 			if (binding.field != null) {
 				if (binding.valueCanReuse) {
 					// reuse; then field set
-					rendered = String.format("%scom.jsoniter.CodegenAccess.setExistingObject(iter, obj.%s);obj.%s=%s%s",
-							rendered.substring(0, start), binding.field.getName(), binding.field.getName(), op,
-							rendered.substring(end));
+					rendered = String.format("%scom.jsoniter.CodegenAccess.setExistingObject(iter, obj.%s);obj.%s=%s%s", rendered.substring(0, start), binding.field.getName(), binding.field.getName(), op, rendered.substring(end));
 				} else {
 					// just field set
-					rendered = String.format("%sobj.%s=%s%s", rendered.substring(0, start), binding.field.getName(), op,
-							rendered.substring(end));
+					rendered = String.format("%sobj.%s=%s%s", rendered.substring(0, start), binding.field.getName(), op, rendered.substring(end));
 				}
 			} else {
 				// method set
-				rendered = String.format("%sobj.%s(%s)%s", rendered.substring(0, start), binding.method.getName(), op,
-						rendered.substring(end));
+				rendered = String.format("%sobj.%s(%s)%s", rendered.substring(0, start), binding.method.getName(), op, rendered.substring(end));
 			}
 		}
 	}
 
+	/**
+	 * 
+	 * @param lines
+	 * @param desc
+	 */
 	private static void appendMissingRequiredProperties(StringBuilder lines, ClassDescriptor desc) {
 		append(lines, "java.util.List missingFields = new java.util.ArrayList();");
 		for (Binding binding : desc.allDecoderBindings()) {
 			if (binding.asMissingWhenNotPresent) {
 				long mask = binding.mask;
-				append(lines,
-						String.format(
-								"com.jsoniter.CodegenAccess.addMissingField(missingFields, tracker, %sL, \"%s\");",
-								mask, binding.name));
+				append(lines, String.format("com.jsoniter.CodegenAccess.addMissingField(missingFields, tracker, %sL, \"%s\");", mask, binding.name));
 			}
 		}
 		if (desc.onMissingProperties == null || !desc.ctor.parameters.isEmpty()) {
@@ -362,10 +388,14 @@ class CodegenImplObjectStrict {
 		}
 	}
 
+	/**
+	 * 
+	 * @param lines
+	 * @param desc
+	 */
 	private static void appendOnUnknownField(StringBuilder lines, ClassDescriptor desc) {
 		if (desc.asExtraForUnknownProperties && desc.onExtraProperties == null) {
-			append(lines, "throw new com.jsoniter.spi.JsonException('extra property: ' + field.toString());"
-					.replace('\'', '"'));
+			append(lines, "throw new com.jsoniter.spi.JsonException('extra property: ' + field.toString());".replace('\'', '"'));
 		} else {
 			if (desc.asExtraForUnknownProperties || !desc.keyValueTypeWrappers.isEmpty()) {
 				append(lines, "if (extra == null) { extra = new java.util.HashMap(); }");
@@ -376,13 +406,17 @@ class CodegenImplObjectStrict {
 		}
 	}
 
+	/**
+	 * 
+	 * @param allBindings
+	 * @return
+	 */
 	private static Map<Integer, Object> buildTriTree(List<Binding> allBindings) {
 		Map<Integer, Object> trieTree = new HashMap<Integer, Object>();
 		for (Binding field : allBindings) {
 			for (String fromName : field.fromNames) {
 				byte[] fromNameBytes = fromName.getBytes();
 				Map<Byte, Object> current = null;
-
 				if (trieTree.get(fromNameBytes.length) instanceof Map<?, ?>) {
 					current = (Map<Byte, Object>) trieTree.get(fromNameBytes.length);
 				}
@@ -408,6 +442,11 @@ class CodegenImplObjectStrict {
 		return trieTree;
 	}
 
+	/**
+	 * 
+	 * @param trieTree
+	 * @return
+	 */
 	private static String renderTriTree(Map<Integer, Object> trieTree) {
 		StringBuilder switchBody = new StringBuilder(SBSIZE);
 		for (Map.Entry<Integer, Object> entry : trieTree.entrySet()) {
@@ -423,6 +462,48 @@ class CodegenImplObjectStrict {
 		return switchBody.toString();
 	}
 
+	/**
+	 * 
+	 * @param entry
+	 * @param lines
+	 * @return
+	 */
+	private static StringBuilder quarto(Map.Entry<Byte, Object> entry, StringBuilder lines) {
+		StringBuilder toReturn = lines;
+		Binding field = null;
+		if (entry.getValue() instanceof Binding) {
+			field = (Binding) entry.getValue();
+		}
+		boolean support = false;
+		if (field.asExtraWhenPresent) {
+			support = true;
+			append(toReturn, String.format(
+					"throw new com.jsoniter.spi.JsonException('extra property: %s');".replace('\'', '"'), field.name));
+		} else if (field.shouldSkip) {
+			support = true;
+			append(toReturn, "iter.skip();");
+			append(toReturn, "continue;");
+		} else if (!support) {
+			support = true;
+			append(toReturn, String.format("_%s_ = %s;", field.name, CodegenImplNative.genField(field)));
+		}
+		if (field.asMissingWhenNotPresent && support) {
+			append(toReturn, "tracker = tracker | " + field.mask + "L;");
+		}
+		if (support) {
+			append(toReturn, "continue;");
+		}
+		return toReturn;
+	}
+
+	/**
+	 * 
+	 * @param lines
+	 * @param len
+	 * @param i
+	 * @param current
+	 * @param bytesToCompare
+	 */
 	private static void addFieldDispatch(StringBuilder lines, int len, int i, Map<Byte, Object> current,
 			List<Byte> bytesToCompare) {
 		int size = 0;
@@ -439,44 +520,13 @@ class CodegenImplObjectStrict {
 				}
 				append(lines, String.format("field.at(%d)==%s", i, b));
 				append(lines, ") {");
-				Binding field = null;
-
-				if (entry.getValue() instanceof Binding) {
-					field = (Binding) entry.getValue();
-				}
-				boolean support = false;
-
-				if (field.asExtraWhenPresent) {
-					support = true;
-					append(lines, String.format(
-							"throw new com.jsoniter.spi.JsonException('extra property: %s');".replace('\'', '"'),
-							field.name));
-				} else if (field.shouldSkip) {
-					support = true;
-					append(lines, "iter.skip();");
-					append(lines, "continue;");
-				} else if (!support) {
-					support = true;
-					append(lines, String.format("_%s_ = %s;", field.name, CodegenImplNative.genField(field)));
-				}
-
-				if (field.asMissingWhenNotPresent && support) {
-					append(lines, "tracker = tracker | " + field.mask + "L;");
-				}
-
-				if (support) {
-					append(lines, "continue;");
-				}
-
+				lines = quarto(entry, lines);
 				append(lines, PARENTESICHIUSA);
-				continue;
 			}
 			Map<Byte, Object> next = null;
-
 			if (entry.getValue() instanceof Map<?, ?>) {
 				next = (Map<Byte, Object>) entry.getValue();
 			}
-
 			if (next.size() == 1) {
 				nextBytesToCompare = new ArrayList<Byte>(bytesToCompare);
 				nextBytesToCompare.add(b);
@@ -513,6 +563,11 @@ class CodegenImplObjectStrict {
 				CodegenImplObjectHash.genNewInstCode(clazz, ctor));
 	}
 
+	/**
+	 * 
+	 * @param lines
+	 * @param str
+	 */
 	static void append(StringBuilder lines, String str) {
 		lines.append(str);
 		lines.append("\n");
