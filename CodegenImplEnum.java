@@ -103,53 +103,60 @@ class CodegenImplEnum {
 		return switchBody.toString();
 	}
 
-	private static void addFieldDispatch(StringBuilder lines, int len, int i, Map<Byte, Object> current,
-			List<Byte> bytesToCompare) {
-		try {
-			Set<Map.Entry<Byte, Object>> setSize = current.entrySet();
-			List<Byte> nextBytesToCompare = null;
-			for (Map.Entry<Byte, Object> entry : setSize) {
-				Byte b = entry.getKey();
-				if (i == len - 1) {
-					append(lines, "if (");
-					int size = bytesToCompare.size();
-					for (int j = 0; j < size; j++) {
-						Byte a = bytesToCompare.get(j);
-						append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
-					}
-					append(lines, String.format("field.at(%d)==%s", i, b));
-					append(lines, ") {");
-					Object e = entry.getValue();
-					append(lines, String.format("return %s.%s;", e.getClass().getName(), e.toString()));
-					append(lines, "}");
-					continue;
-				}
-				Map<Byte, Object> next = null;
+	private static StringBuilder primo(StringBuilder lines, List<Byte> bytesToCompare, Map.Entry<Byte, Object> entry,
+			int i, Byte b) {
+		StringBuilder toReturn = lines;
+		append(toReturn, "if (");
+		int size = bytesToCompare.size();
+		for (int j = 0; j < size; j++) {
+			Byte a = bytesToCompare.get(j);
+			append(toReturn, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
+		}
+		append(toReturn, String.format("field.at(%d)==%s", i, b));
+		append(toReturn, ") {");
+		Object e = entry.getValue();
+		append(toReturn, String.format("return %s.%s;", e.getClass().getName(), e.toString()));
+		append(toReturn, "}");
 
-				if (entry.getValue() instanceof Map<?, ?>) {
-					next = (Map<Byte, Object>) entry.getValue();
-				}
-				if (next.size() == 1) {
-					nextBytesToCompare = new ArrayList<Byte>(bytesToCompare);
-					nextBytesToCompare.add(b);
-					addFieldDispatch(lines, len, i + 1, next, nextBytesToCompare);
-					continue;
-				}
-				append(lines, "if (");
-				int size = bytesToCompare.size();
-				for (int j = 0; j < size; j++) {
-					Byte a = bytesToCompare.get(j);
-					append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
-				}
-				append(lines, String.format("field.at(%d)==%s", i, b));
-				append(lines, ") {");
-				addFieldDispatch(lines, len, i + 1, next, new ArrayList<Byte>());
-				append(lines, "}");
+		return toReturn;
+	}
+	
+	private static StringBuilder secondo(StringBuilder lines, List<Byte> bytesToCompare, int len, int i, Byte b,
+			Map<Byte, Object> next) {
+		StringBuilder toReturn = lines;
+		append(toReturn, "if (");
+		int size = bytesToCompare.size();
+		for (int j = 0; j < size; j++) {
+			Byte a = bytesToCompare.get(j);
+			append(toReturn, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
+		}
+		append(toReturn, String.format("field.at(%d)==%s", i, b));
+		append(toReturn, ") {");
+		addFieldDispatch(toReturn, len, i + 1, next, new ArrayList<Byte>());
+		append(toReturn, "}");
+		return toReturn;
+	}
+
+	private static void addFieldDispatch(StringBuilder lines, int len, int i, Map<Byte, Object> current, List<Byte> bytesToCompare) {
+		Set<Map.Entry<Byte, Object>> setSize = current.entrySet();
+		List<Byte> nextBytesToCompare = null;
+		for (Map.Entry<Byte, Object> entry : setSize) {
+			Byte b = entry.getKey();
+			if (i == len - 1) {
+				lines = primo(lines, bytesToCompare, entry, i, b);
+				continue;
 			}
-		} catch (Exception e1) {
-			System.out.println("Exception " + e1);
-		} finally {
-			System.out.print("");
+			Map<Byte, Object> next = null;
+			if (entry.getValue() instanceof Map<?, ?>) {
+				next = (Map<Byte, Object>) entry.getValue();
+			}
+			if (next.size() == 1) {
+				nextBytesToCompare = new ArrayList<Byte>(bytesToCompare);
+				nextBytesToCompare.add(b);
+				addFieldDispatch(lines, len, i + 1, next, nextBytesToCompare);
+				continue;
+			}
+			lines = secondo(lines, bytesToCompare, len, i, b, next);
 		}
 	}
 
