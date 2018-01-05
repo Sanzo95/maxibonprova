@@ -35,7 +35,16 @@ class CodegenImplNative {
 	}
 
 	/**
-	 * 
+	 * Class intclass = int.class line 348
+	 */
+	static final Class intclass = int.class;
+	/**
+	 * Class longclass = int.class line 348
+	 */
+	static final Class longclass = long.class;
+	
+	/**
+	 * NATIVE_READS map with string string
 	 */
 	final static Map<String, String> NATIVE_READS = new HashMap<String, String>() {
 		{
@@ -128,7 +137,7 @@ class CodegenImplNative {
 					return iter.readNull() ? null : iter.readShort();
 				}
 			});
-			put(int.class, new Decoder() {
+			put(intclass, new Decoder() {
 				@Override
 				public Object decode(JsonIterator iter) throws IOException {
 					return iter.readInt();
@@ -152,7 +161,7 @@ class CodegenImplNative {
 					return iter.readNull() ? null : Integer.toString(iter.readInt()).charAt(0);
 				}
 			});
-			put(long.class, new Decoder() {
+			put(longclass, new Decoder() {
 				@Override
 				public Object decode(JsonIterator iter) throws IOException {
 					return iter.readLong();
@@ -342,12 +351,12 @@ class CodegenImplNative {
 	 */
 	private static String limitStatements4(Type vT, Decoder d, String cK) {
 		String s = "null_4";
-		if (int.class.equals(vT)) {
+		if (intclass.equals(vT)) {
 			if ((d instanceof Decoder.IntDecoder) == false) {
 				throw new JsonException(DECODEFOR + cK + "must implement Decoder.IntDecoder");
 			}
 			s = String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK);
-		} else if (vT == long.class) {
+		} else if (vT == longclass) {
 			if ((d instanceof Decoder.LongDecoder) == false) {
 				throw new JsonException(DECODEFOR + cK + "must implement Decoder.LongDecoder");
 			}
