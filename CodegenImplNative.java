@@ -317,6 +317,7 @@ class CodegenImplNative {
 			throw new JsonException(DECODEFOR + cacheKey + print);
 		}
 	}
+
 	/**
 	 * 
 	 * @param vT
@@ -328,9 +329,8 @@ class CodegenImplNative {
 		String s = (vT == int.class) ? (d instanceof Decoder.IntDecoder) == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK) : NULL4;
 		String err = "must implement Decoder.IntDecoder";
 		limitStatement3If(ERR1,s,cK, err);
-		s = (vT == long.class) ? (d instanceof Decoder.LongDecoder) == false ? ERR2 : String.format("com.jsoniter.CodegenAccess.readLong(\"%s\", iter)", cK) : NULL4;
+		s = limitStatements5(vT, d, s, cK, err);
 		err = "must implement Decoder.LongDecoder";
-		limitStatement3If(ERR2,s,cK, err);
 		s = (vT == float.class) ? (d instanceof Decoder.FloatDecoder) == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readFloat(\"%s\", iter)", cK) : NULL4;
 		err = "must implement Decoder.FloatDecoder";
 		limitStatement3If(ERR3,s,cK, err);
@@ -338,6 +338,17 @@ class CodegenImplNative {
 		err = "must implement Decoder.DoubleDecoder";
 		limitStatement3If(ERR4,s,cK, err);	
 		return s;
+	}
+	
+	private static String limitStatements5(Type vT, Decoder d, String s, String cK, String err) {
+		String toRet = "void";
+		if (vT == long.class) {
+			if ((d instanceof Decoder.LongDecoder) == false) {
+				limitStatement3If(ERR2, s, cK, err);
+			}
+			toRet = String.format("com.jsoniter.CodegenAccess.readLong(\"%s\", iter)", cK);
+		}
+		return toRet;
 	}
 
 	/**
