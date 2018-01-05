@@ -419,6 +419,7 @@ class CodegenImplObjectStrict {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	/**
 	 * 
 	 * @param allBindings
@@ -437,22 +438,35 @@ class CodegenImplObjectStrict {
 					current = new HashMap<Byte, Object>();
 					trieTree.put(fromNameBytes.length, current);
 				}
-				for (int i = 0; i < fromNameBytes.length - 1; i++) {
-					byte b = fromNameBytes[i];
-					Map<Byte, Object> next = null;
-					if (current.get(b) instanceof Map<?, ?>) {
-						next = (Map<Byte, Object>) current.get(b);
-					}
-					if (next == null) {
-						next = new HashMap<Byte, Object>();
-						current.put(b, next);
-					}
-					current = next;
-				}
+				current = sesto(fromNameBytes, current);
 				current.put(fromNameBytes[fromNameBytes.length - 1], field);
 			}
 		}
 		return trieTree;
+	}
+
+	@SuppressWarnings("unchecked")
+	/**
+	 * 
+	 * @param fromNameBytes
+	 * @param current
+	 * @return
+	 */
+	private static Map<Byte, Object> sesto(byte[] fromNameBytes, Map<Byte, Object> current) {
+		Map<Byte, Object> newMap = current;
+		for (int i = 0; i < fromNameBytes.length - 1; i++) {
+			byte b = fromNameBytes[i];
+			Map<Byte, Object> next = null;
+			if (newMap.get(b) instanceof Map<?, ?>) {
+				next = (Map<Byte, Object>) newMap.get(b);
+			}
+			if (next == null) {
+				next = new HashMap<Byte, Object>();
+				newMap.put(b, next);
+			}
+			newMap = next;
+		}
+		return newMap;
 	}
 
 	/**
@@ -502,12 +516,65 @@ class CodegenImplObjectStrict {
 		if (field.asMissingWhenNotPresent && support) {
 			append(toReturn, "tracker = tracker | " + field.mask + "L;");
 		}
-		if (support) {
+		if (support)
 			append(toReturn, "continue;");
+		return toReturn;
+	}
+
+	/**
+	 * 
+	 * @param i
+	 * @param len
+	 * @param lines
+	 * @param bytesToCompare
+	 * @param entry
+	 * @param b
+	 * @return
+	 */
+	private static StringBuilder settimo(int i, int len, StringBuilder lines, List<Byte> bytesToCompare,
+			Map.Entry<Byte, Object> entry, Byte b) {
+		StringBuilder toReturn = lines;
+		int size = 0;
+		if (i == len - 1) {
+			append(toReturn, "if (");
+			size = bytesToCompare.size();
+			for (int j = 0; j < size; j++) {
+				Byte a = bytesToCompare.get(j);
+				append(toReturn, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
+			}
+			append(toReturn, String.format("field.at(%d)==%s", i, b));
+			append(toReturn, ") {");
+			toReturn = quarto(entry, toReturn);
+			append(toReturn, PARENTESICHIUSA);
 		}
 		return toReturn;
 	}
-	
+
+	/**
+	 * 
+	 * @param lines
+	 * @param i
+	 * @param len
+	 * @param bytesToCompare
+	 * @param b
+	 * @param next
+	 * @return
+	 */
+	private static StringBuilder ottavo(StringBuilder lines, int i, int len, List<Byte> bytesToCompare, Byte b,
+			Map<Byte, Object> next) {
+		StringBuilder toReturn = lines;
+		append(lines, "if (");
+		int size = bytesToCompare.size();
+		for (int j = 0; j < size; j++) {
+			Byte a = bytesToCompare.get(j);
+			append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
+		}
+		append(lines, String.format("field.at(%d)==%s", i, b));
+		append(lines, ") {");
+		addFieldDispatch(lines, len, i + 1, next, new ArrayList<Byte>());
+		append(lines, PARENTESICHIUSA);
+		return toReturn;
+	}
 
 	/**
 	 * 
@@ -523,20 +590,9 @@ class CodegenImplObjectStrict {
 		Set<Entry<Byte, Object>> setSize = current.entrySet();
 		List<Byte> nextBytesToCompare = null;
 		for (Map.Entry<Byte, Object> entry : setSize) {
-			Byte b = entry.getKey();
-			if (i == len - 1) {
-				append(lines, "if (");
-				size = bytesToCompare.size();
-				for (int j = 0; j < size; j++) {
-					Byte a = bytesToCompare.get(j);
-					append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
-				}
-				append(lines, String.format("field.at(%d)==%s", i, b));
-				append(lines, ") {");
-				lines = quarto(entry, lines);
-				append(lines, PARENTESICHIUSA);
-			}
 			Map<Byte, Object> next = null;
+			Byte b = entry.getKey();
+			lines = settimo(i, len, lines, bytesToCompare, entry, b);
 			if (entry.getValue() instanceof Map<?, ?>) {
 				next = (Map<Byte, Object>) entry.getValue();
 			}
@@ -546,18 +602,8 @@ class CodegenImplObjectStrict {
 				addFieldDispatch(lines, len, i + 1, next, nextBytesToCompare);
 				continue;
 			}
-			append(lines, "if (");
-			size = bytesToCompare.size();
-			for (int j = 0; j < size; j++) {
-				Byte a = bytesToCompare.get(j);
-				append(lines, String.format("field.at(%d)==%s && ", i - bytesToCompare.size() + j, a));
-			}
-			append(lines, String.format("field.at(%d)==%s", i, b));
-			append(lines, ") {");
-			addFieldDispatch(lines, len, i + 1, next, new ArrayList<Byte>());
-			append(lines, PARENTESICHIUSA);
+			lines = ottavo(lines, i, len, bytesToCompare, b, next);
 		}
-
 	}
 
 	/**
