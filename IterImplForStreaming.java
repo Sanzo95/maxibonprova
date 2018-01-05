@@ -263,13 +263,10 @@ class IterImplForStreaming {
 				byte c = iter.buf[i];
 				switch (c) {
 				case ' ':
-					break;
 				case '\n':
-					break;
 				case '\t':
-					break;
 				case '\r':
-					break;
+					continue;
 				default:
 					iter.head = i + 1;
 					return c;
@@ -440,9 +437,7 @@ class IterImplForStreaming {
 					bc = '\r';
 					break;
 				case '"':
-					break;
 				case '/':
-					break;
 				case '\\':
 					break;
 				case 'u':
@@ -680,47 +675,19 @@ class IterImplForStreaming {
 				byte c = iter.buf[i];
 				switch (c) {
 				case '-':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '+':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '.':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case 'e':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case 'E':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '0':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '1':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '2':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '3':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '4':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '5':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '6':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '7':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '8':
-					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
-					break;
 				case '9':
 					iter.reusableChars[j++] = Byte.toString(c).charAt(0);
 					break;
