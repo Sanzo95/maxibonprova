@@ -48,14 +48,17 @@ class CodegenImplObjectStrict {
 	 */
 	private final static int SBSIZE = 128;
 	/**
+	 * "throw new com.jsoniter.spi.JsonException('extra property: %s');"
+	 */
+	static final String QUARTO = "throw new com.jsoniter.spi.JsonException('extra property: %s');";
+	/**
+	 * %scom.jsoniter.CodegenAccess.setExistingObject(iter, obj.%s);obj.%s=%s%s 
+	 */
+	static final String QUINTO= "%scom.jsoniter.CodegenAccess.setExistingObject(iter, obj.%s);obj.%s=%s%s";
+	/**
 	 * static Map<String, String> DEFAULT_VALUES
 	 */
-	final static Map<String, String> DEFAULT_VALUES = new HashMap<String, String>() {
-		/**
-		 * 
-		 */
-		private static final long SERIALVERSIONUID = 7389282851528177046L;
-
+	static final Map<String, String> DEFAULT_VALUES = new HashMap<String, String>() {
 		{
 			put("float", "0.0f");
 			put("double", "0.0d");
@@ -116,7 +119,7 @@ class CodegenImplObjectStrict {
 	}
 
 	/**
-	 * 
+	 * 24 LINES OF CODE
 	 * @param allBindings
 	 * @param desc
 	 * @param lines
@@ -154,7 +157,7 @@ class CodegenImplObjectStrict {
 	}
 
 	/**
-	 * 
+	 * 19 LOC
 	 * @param desc
 	 * @param lines
 	 * @param b
@@ -182,7 +185,7 @@ class CodegenImplObjectStrict {
 	}
 
 	/**
-	 * 
+	 * 23 LOC
 	 * @param bin
 	 * @param cD
 	 * @param s
@@ -219,7 +222,7 @@ class CodegenImplObjectStrict {
 
 	/**
 	 * genObjectUsingStrict
-	 * 
+	 * 25 LOC
 	 * @param desc
 	 * @return
 	 */
@@ -235,7 +238,7 @@ class CodegenImplObjectStrict {
 		append(lines, "if (iter.readNull()) { return null; }");
 		if (hasRequiredBinding) {
 			append(lines, "long tracker = 0;");
-		} // 11
+		}
 		if (desc.ctor.parameters.isEmpty()) {
 			append(lines, "{{clazz}} obj = {{newInst}};");
 			append(lines, "if (!com.jsoniter.CodegenAccess.readObjectStart(iter)) {");
@@ -322,6 +325,31 @@ class CodegenImplObjectStrict {
 		return requiredIdx;
 	}
 
+	private static String quinto(String rendered, Binding binding, String marker, int start) {
+		int middle = rendered.indexOf('=', start);
+		if (middle == -1) {
+			throw new JsonException("can not find = in: " + rendered + " ,at " + start);
+		}
+		middle += 1;
+		int end = rendered.indexOf(';', start);
+		if (end == -1) {
+			throw new JsonException("can not find ; in: " + rendered + " ,at " + start);
+		}
+		String op = rendered.substring(middle, end);
+		if (binding.field != null) {
+			if (binding.valueCanReuse) {
+				// reuse; then field set
+				return String.format(QUINTO, rendered.substring(0, start), binding.field.getName(), binding.field.getName(), op, rendered.substring(end));
+			} else {
+				// just field set
+				return String.format("%sobj.%s=%s%s", rendered.substring(0, start), binding.field.getName(), op, rendered.substring(end));
+			}
+		} else {
+			// method set
+			return String.format("%sobj.%s(%s)%s", rendered.substring(0, start), binding.method.getName(), op, rendered.substring(end));
+		}
+	}
+
 	/**
 	 * 
 	 * @param rendered
@@ -329,38 +357,24 @@ class CodegenImplObjectStrict {
 	 * @return
 	 */
 	private static String updateBindingSetOp(String rendered, Binding binding) {
+		boolean flag = false;
+		String toReturn = rendered;
 		if (binding.fromNames.length == 0) {
-			return rendered;
+			flag = false;
+		} else {
+			flag = true;
 		}
-		while (true) {
+		while (flag) {
 			String marker = "_" + binding.name + "_";
-			int start = rendered.indexOf(marker);
+			int start = toReturn.indexOf(marker);
 			if (start == -1) {
-				return rendered;
+				toReturn = rendered;
+				flag = false;
+				break;
 			}
-			int middle = rendered.indexOf('=', start);
-			if (middle == -1) {
-				throw new JsonException("can not find = in: " + rendered + " ,at " + start);
-			}
-			middle += 1;
-			int end = rendered.indexOf(';', start);
-			if (end == -1) {
-				throw new JsonException("can not find ; in: " + rendered + " ,at " + start);
-			}
-			String op = rendered.substring(middle, end);
-			if (binding.field != null) {
-				if (binding.valueCanReuse) {
-					// reuse; then field set
-					rendered = String.format("%scom.jsoniter.CodegenAccess.setExistingObject(iter, obj.%s);obj.%s=%s%s", rendered.substring(0, start), binding.field.getName(), binding.field.getName(), op, rendered.substring(end));
-				} else {
-					// just field set
-					rendered = String.format("%sobj.%s=%s%s", rendered.substring(0, start), binding.field.getName(), op, rendered.substring(end));
-				}
-			} else {
-				// method set
-				rendered = String.format("%sobj.%s(%s)%s", rendered.substring(0, start), binding.method.getName(), op, rendered.substring(end));
-			}
+			toReturn = quinto(toReturn, binding, marker, start);
 		}
+		return toReturn;
 	}
 
 	/**
@@ -387,7 +401,6 @@ class CodegenImplObjectStrict {
 			}
 		}
 	}
-
 	/**
 	 * 
 	 * @param lines
@@ -471,14 +484,13 @@ class CodegenImplObjectStrict {
 	private static StringBuilder quarto(Map.Entry<Byte, Object> entry, StringBuilder lines) {
 		StringBuilder toReturn = lines;
 		Binding field = null;
+		boolean support = false;
 		if (entry.getValue() instanceof Binding) {
 			field = (Binding) entry.getValue();
 		}
-		boolean support = false;
 		if (field.asExtraWhenPresent) {
 			support = true;
-			append(toReturn, String.format(
-					"throw new com.jsoniter.spi.JsonException('extra property: %s');".replace('\'', '"'), field.name));
+			append(toReturn, String.format(QUARTO.replace('\'', '"'), field.name));
 		} else if (field.shouldSkip) {
 			support = true;
 			append(toReturn, "iter.skip();");
@@ -495,6 +507,7 @@ class CodegenImplObjectStrict {
 		}
 		return toReturn;
 	}
+	
 
 	/**
 	 * 
