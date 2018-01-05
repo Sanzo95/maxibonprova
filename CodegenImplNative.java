@@ -342,7 +342,7 @@ class CodegenImplNative {
 	 */
 	private static String limitStatements4(Type vT, Decoder d, String cK) {
 		String s = "null_4";
-		if (vT == int.class) {
+		if (int.class.equals(vT)) {
 			if ((d instanceof Decoder.IntDecoder) == false) {
 				throw new JsonException(DECODEFOR + cK + "must implement Decoder.IntDecoder");
 			}
