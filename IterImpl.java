@@ -287,13 +287,15 @@ class IterImpl {
 								+ (IterImplString.translateHex(iter.buf[i++]) << 8)
 								+ (IterImplString.translateHex(iter.buf[i++]) << 4)
 								+ IterImplString.translateHex(iter.buf[i++]);
-
-						if ((isExpectingLowSurrogate && Character.isHighSurrogate((char) bc))
-								|| (!isExpectingLowSurrogate && Character.isLowSurrogate((char) bc))) {
+						boolean bH = Character.isHighSurrogate((char) bc);
+						boolean bL = Character.isLowSurrogate((char) bc);
+						boolean b1 = (isExpectingLowSurrogate && bH);
+						boolean b2 = (!isExpectingLowSurrogate && bL);
+						if (b1 || b2) {
 							throw new JsonException("invalid surrogate");
-						} else if (!isExpectingLowSurrogate && Character.isHighSurrogate((char) bc)) {
+						} else if (!isExpectingLowSurrogate && bH) {
 							isExpectingLowSurrogate = true;
-						} else if (isExpectingLowSurrogate && Character.isLowSurrogate((char) bc)) {
+						} else if (isExpectingLowSurrogate && bL) {
 							isExpectingLowSurrogate = false;
 						} else {
 							throw new JsonException("invalid surrogate");
